@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="hero">
+    <div>
+        <p class="chip">Master Thesis Project</p>
+        <h1>{{ thesis.title }}</h1>
+        <p class="lead">{{ thesis.abstract }}</p>
+        <div class="hero-actions">
+            <a class="btn btn-primary" href="{{ url_for('analysis') }}">Open AI Analysis</a>
+            <a class="btn btn-outline" href="{{ url_for('dashboard', role='hr') }}">View Role Dashboards</a>
+        </div>
+    </div>
+    <div class="hero-card">
+        <h3>Core KPI Stack</h3>
+        <ul>
+            <li>Leadership Readiness Score</li>
+            <li>Scaling Risk Score</li>
+            <li>Overall Organizational Health Index</li>
+        </ul>
+        <p>Data pipeline includes validation, scoring, and decision-focused recommendations.</p>
+    </div>
+</section>
+
+<section class="panel">
+    <h2>Main Thesis Sections</h2>
+    <div class="grid two">
+        {% set section_slugs = [1, 2, 3, 4, 5] %}
+        {% for section in thesis.sections %}
+        <a class="card card-link stagger-item" href="{{ url_for('section_view', number=loop.index) }}">
+            <span class="section-index">{{ loop.index }}</span>
+            <h3>{{ section }}</h3>
+            <p class="card-cta">Read section &rarr;</p>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="panel">
+    <h2>Role-Based Views</h2>
+    <div class="grid four">
+        <a class="role-tile" href="{{ url_for('dashboard', role='ceo') }}">CEO</a>
+        <a class="role-tile" href="{{ url_for('dashboard', role='hr') }}">HR</a>
+        <a class="role-tile" href="{{ url_for('dashboard', role='finance') }}">Finance</a>
+        <a class="role-tile" href="{{ url_for('dashboard', role='operations') }}">Operations</a>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="panel section-hero">
+    <div class="section-badge">Section {{ sec.number }}</div>
+    <h1>{{ sec.title }}</h1>
+    <p class="lead">{{ sec.subtitle }}</p>
+    <p class="section-overview">{{ sec.overview }}</p>
+    <div class="section-nav-pills">
+        {% for n in [1,2,3,4,5] %}
+        <a class="pill{% if n == sec.number %} pill-active{% endif %}"
+           href="{{ url_for('section_view', number=n) }}">{{ n }}</a>
+        {% endfor %}
+    </div>
+</section>
+
+{% for item in sec.content %}
+<section class="panel section-block">
+    <h2 class="section-heading">{{ item.heading }}</h2>
+    <p>{{ item.body }}</p>
+
+    {# --- Architecture layers --- #}
+    {% if item.architecture_layers is defined %}
+    <div class="arch-stack">
+        {% for layer in item.architecture_layers %}
+        <div class="arch-layer arch-{{ layer.color }}">
+            <span class="arch-label">{{ layer.layer }}</span>
+            <span class="arch-tech">{{ layer.tech }}</span>
+            <span class="arch-role">{{ layer.role }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {# --- KPI formulas --- #}
+    {% if item.formulas is defined %}
+    <div class="formula-grid">
+        {% for f in item.formulas %}
+        <div class="formula-card">
+            <h4>{{ f.name }}</h4>
+            <code>{{ f.formula }}</code>
+            <p class="formula-rationale">{{ f.rationale }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {# --- Tech stack --- #}
+    {% if item.stack is defined %}
+    <div class="stack-grid">
+        {% for s in item.stack %}
+        <div class="stack-item">
+            <strong>{{ s.name }}</strong>
+            <span>{{ s.role }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {# --- Pipeline steps --- #}
+    {% if item.pipeline_steps is defined %}
+    <ol class="pipeline-list">
+        {% for p in item.pipeline_steps %}
+        <li><strong>{{ p.step }}</strong> — {{ p.detail }}</li>
+        {% endfor %}
+    </ol>
+    {% endif %}
+
+    {# --- Code snippet --- #}
+    {% if item.code_snippet is defined %}
+    <div class="code-block">
+        <p class="code-caption">{{ item.code_snippet.caption }}</p>
+        <pre><code>{{ item.code_snippet.code }}</code></pre>
+    </div>
+    {% endif %}
+
+    {# --- Test cases --- #}
+    {% if item.test_cases is defined %}
+    <div class="test-case-grid">
+        {% for t in item.test_cases %}
+        <div class="test-case">
+            <strong>{{ t.scenario }}</strong>
+            <p><em>Inputs:</em> {{ t.inputs }}</p>
+            <p><em>Expected:</em> {{ t.expected }}</p>
+            <p class="test-result">{{ t.result }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {# --- Future work items --- #}
+    {% if item.future_items is defined %}
+    <div class="future-grid">
+        {% for fw in item.future_items %}
+        <div class="future-card priority-{{ fw.priority | lower | replace(' ','') }}">
+            <div class="future-top">
+                <h4>{{ fw.title }}</h4>
+                <span class="priority-badge">{{ fw.priority }}</span>
+            </div>
+            <p>{{ fw.detail }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {# --- Generic data table --- #}
+    {% if item.table is defined %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>{% for h in item.table.headers %}<th>{{ h }}</th>{% endfor %}</tr>
+            </thead>
+            <tbody>
+                {% for row in item.table.rows %}
+                <tr>
+                    {% for cell in row %}
+                    <td>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endfor %}
+
+<div class="section-pagination">
+    {% if sec.number > 1 %}
+    <a class="btn btn-outline" href="{{ url_for('section_view', number=sec.number - 1) }}">&larr; Previous Section</a>
+    {% endif %}
+    {% if sec.number < 5 %}
+    <a class="btn btn-primary" href="{{ url_for('section_view', number=sec.number + 1) }}">Next Section &rarr;</a>
+    {% endif %}
+    {% if sec.number == 5 %}
+    <a class="btn btn-primary" href="{{ url_for('home') }}">Back to Home</a>
+    {% endif %}
+</div>
+{% endblock %}

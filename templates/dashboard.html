@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="panel">
+    <p class="chip">Role Dashboard</p>
+    <h1>{{ role.title }}</h1>
+    <p class="lead">{{ role.goal }}</p>
+
+    <div class="grid three">
+        {% for kpi in role.kpis %}
+        <article class="card">
+            <h3>{{ kpi }}</h3>
+            <p>Use this KPI to monitor trend movement and support strategy checkpoints.</p>
+        </article>
+        {% endfor %}
+    </div>
+
+    <div class="dashboard-links">
+        <a class="btn btn-outline" href="{{ url_for('dashboard', role='ceo') }}">CEO</a>
+        <a class="btn btn-outline" href="{{ url_for('dashboard', role='hr') }}">HR</a>
+        <a class="btn btn-outline" href="{{ url_for('dashboard', role='finance') }}">Finance</a>
+        <a class="btn btn-outline" href="{{ url_for('dashboard', role='operations') }}">Operations</a>
+    </div>
+</section>
+{% endblock %}
