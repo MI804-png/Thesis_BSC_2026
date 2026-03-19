@@ -85,7 +85,7 @@ def create_thesis_documentation():
     story.append(Spacer(1, 1.5*cm))
     
     story.append(Paragraph(
-        "<b>Master Thesis</b>",
+        "<b>Bachelor Thesis</b>",
         ParagraphStyle('subtitle', parent=styles['Normal'], fontSize=14, alignment=TA_CENTER)
     ))
     story.append(Spacer(1, 0.5*cm))
@@ -1289,6 +1289,196 @@ def create_thesis_documentation():
     Alexandria, VA.<br/><br/>
     """
     story.append(Paragraph(references_content, body_style))
+    story.append(PageBreak())
+
+    story.append(Paragraph("13.1 Annotated Bibliography: HRIS and DSS Foundations", heading2_style))
+    references_page_1 = """
+    <b>Bondarouk and Ruel (2009)</b><br/>
+    Relevance: Provides a foundational taxonomy for HRIS maturity levels (operational, relational, transformational),
+    which directly informed the thesis framing that most organizations remain under-mature in strategic HR analytics.
+    Contribution to this thesis: Supports the argument for moving beyond transactional HR reporting toward managerial
+    decision support based on integrated indicators and interpretable metrics.<br/><br/>
+
+    <b>Gorry and Scott Morton (1971)</b><br/>
+    Relevance: Classic DSS framework distinguishing structured, semi-structured, and unstructured decision contexts.
+    Contribution to this thesis: Validates why organizational performance and risk assessment requires interactive
+    decision support rather than static dashboards or summary reporting alone.<br/><br/>
+
+    <b>Keen and Scott Morton (1978)</b><br/>
+    Relevance: Extends DSS thinking to management practice and organizational behavior.
+    Contribution to this thesis: Informs the role-based dashboard concept by emphasizing that decision contexts differ
+    between executive, operational, and support functions; each role requires filtered but connected KPI views.<br/><br/>
+
+    <b>Power (2007)</b><br/>
+    Relevance: DSS taxonomy (data-driven, model-driven, knowledge-driven, document-driven, communication-driven).
+    Contribution to this thesis: The implemented system is explicitly positioned as a hybrid data-driven and model-driven
+    DSS, using transparent aggregation formulas and scenario-oriented interpretation.<br/><br/>
+
+    <b>Kaplan and Norton (1992)</b><br/>
+    Relevance: Balanced Scorecard as a multi-perspective performance system.
+    Contribution to this thesis: Motivates integration of financial and non-financial signals in a single organizational
+    health construct, avoiding over-reliance on lagging financial outcomes alone.<br/><br/>
+
+    <b>Cascio and Boudreau (2011)</b><br/>
+    Relevance: Formalizes HR investment impact assessment and financial linkage.
+    Contribution to this thesis: Supports treating retention, leadership readiness, and workforce stability as strategic
+    value drivers rather than purely HR department metrics.
+    """
+    story.append(Paragraph(references_page_1, body_style))
+    story.append(PageBreak())
+
+    story.append(Paragraph("13.2 Annotated Bibliography: Risk, Leadership, and Resilience", heading2_style))
+    references_page_2 = """
+    <b>Altman (1968)</b><br/>
+    Relevance: Landmark bankruptcy prediction model integrating financial ratios.
+    Contribution to this thesis: While this system does not replicate Z-score directly, the conceptual approach of ratio-based
+    solvency signaling influenced Financial Stability Composite design and risk communication methodology.<br/><br/>
+
+    <b>Rothwell (2010)</b><br/>
+    Relevance: Leadership continuity and succession planning framework.
+    Contribution to this thesis: Justifies inclusion of leadership depth and key-person dependency as explicit predictors
+    of organizational fragility and long-term execution resilience.<br/><br/>
+
+    <b>Christopher and Holweg (2011)</b><br/>
+    Relevance: Supply chain resilience and operational vulnerability under disruption.
+    Contribution to this thesis: Extends resilience logic from supply systems to organizational process systems,
+    motivating the use of process documentation and operational concentration metrics in Scaling Risk Score.<br/><br/>
+
+    <b>Tushman and Nadler (1986)</b><br/>
+    Relevance: Organizational design and innovation execution constraints.
+    Contribution to this thesis: Reinforces that organizational capability depends on structural fit and adaptive capacity,
+    not only financial output; this informs the multi-domain KPI architecture.<br/><br/>
+
+    <b>Lepak, Takeuchi, and Snell (2003)</b><br/>
+    Relevance: Human capital architecture and performance implications.
+    Contribution to this thesis: Supports differentiating talent retention and leadership readiness as direct strategic
+    signals with measurable performance effects.<br/><br/>
+
+    <b>Weatherly (2003)</b><br/>
+    Relevance: Business value of human capital and managerial accountability.
+    Contribution to this thesis: Aligns with the thesis objective of translating people-related conditions into
+    interpretable decision signals for executives and boards.
+    """
+    story.append(Paragraph(references_page_2, body_style))
+    story.append(PageBreak())
+
+    story.append(Paragraph("13.3 Methodological Resource Map", heading2_style))
+    references_page_3 = """
+    <b>Resource Category A: Theoretical Foundations</b><br/>
+    Included Sources: Gorry and Scott Morton (1971), Keen and Scott Morton (1978), Power (2007).<br/>
+    Use in Thesis: Definition of DSS boundaries, model scope, and interaction design assumptions.<br/><br/>
+
+    <b>Resource Category B: Performance System Design</b><br/>
+    Included Sources: Kaplan and Norton (1992), Cascio and Boudreau (2011), Bondarouk and Ruel (2009).<br/>
+    Use in Thesis: Construction of balanced composite metrics where financial and organizational capability indicators
+    are jointly interpreted; justification for weighting strategy and role-based reporting.<br/><br/>
+
+    <b>Resource Category C: Risk and Failure Prediction</b><br/>
+    Included Sources: Altman (1968), Christopher and Holweg (2011), Rothwell (2010).<br/>
+    Use in Thesis: Conceptual basis for risk scoring dimensions, intervention urgency interpretation,
+    and conservative probability adjustment to prevent over-optimistic outputs.<br/><br/>
+
+    <b>Resource Category D: Organizational Capability and Innovation</b><br/>
+    Included Sources: Tushman and Nadler (1986), Lepak et al. (2003), Soliman and Spooner (2000).<br/>
+    Use in Thesis: Reinforces the need to integrate process quality, talent continuity, and adaptive capability
+    into the same analytical model rather than analyzing each in isolation.<br/><br/>
+
+    <b>Resource Category E: Practical Management Application</b><br/>
+    Included Sources: Weatherly (2003), Christensen (1997), Molleman and Slomp (2005).<br/>
+    Use in Thesis: Supports translation from academic metrics into action-oriented governance use cases,
+    especially strategic planning, restructuring prioritization, and board-level oversight.
+    """
+    story.append(Paragraph(references_page_3, body_style))
+    story.append(PageBreak())
+
+    story.append(Paragraph("13.4 Expanded Digital and Industry Resources", heading2_style))
+    references_page_4 = """
+    <b>Industry Platforms and Documentation</b><br/>
+    1. SAP SuccessFactors Product Documentation and Workforce Analytics guides.<br/>
+    2. Workday HCM and Prism Analytics product knowledge base.<br/>
+    3. Oracle HCM Cloud analytics and reporting documentation.<br/>
+    4. Microsoft Power BI HR analytics templates and governance recommendations.<br/>
+    5. Tableau workforce analytics design guides.<br/><br/>
+
+    <b>Methodological Tooling Resources</b><br/>
+    1. Flask documentation for lightweight web application architecture.<br/>
+    2. ReportLab documentation for reproducible PDF generation and formal thesis packaging.<br/>
+    3. Python standard library references for deterministic computation and validation routines.<br/><br/>
+
+    <b>Responsible Use and Integrity Resources</b><br/>
+    1. University policy documents on citation standards and responsible tool usage.<br/>
+    2. Turnitin guidance on AI writing transparency and false positive handling.<br/>
+    3. Academic integrity frameworks emphasizing process evidence and author accountability.<br/><br/>
+
+    <b>Why these resources are included</b><br/>
+    The thesis implementation was designed to remain open, inspectable, and reproducible. Practical resources are
+    therefore listed not as substitutes for peer-reviewed literature, but as implementation references that allow
+    examiners and future researchers to reproduce the system environment, verify assumptions, and extend the prototype
+    without hidden dependencies.
+    """
+    story.append(Paragraph(references_page_4, body_style))
+    story.append(PageBreak())
+
+    story.append(Paragraph("13.5 Source-to-Section Traceability", heading2_style))
+    references_page_5 = """
+    <b>Traceability Objective</b><br/>
+    This matrix maps major thesis claims to the source families used to justify them, enabling transparent review of
+    evidentiary support and helping examiners evaluate methodological rigor.<br/><br/>
+
+    <b>Claim Group 1: Existing HR systems are predominantly transactional.</b><br/>
+    Supporting Sources: Bondarouk and Ruel (2009), Cascio and Boudreau (2011), platform documentation comparisons.<br/>
+    Referenced In: Sections 2 and 3.<br/><br/>
+
+    <b>Claim Group 2: Strategic decisions require integrated cross-domain indicators.</b><br/>
+    Supporting Sources: Kaplan and Norton (1992), Keen and Scott Morton (1978), Power (2007).<br/>
+    Referenced In: Sections 3 and 4.<br/><br/>
+
+    <b>Claim Group 3: Organizational risk must include leadership, operational, and financial dimensions.</b><br/>
+    Supporting Sources: Altman (1968), Rothwell (2010), Christopher and Holweg (2011).<br/>
+    Referenced In: Sections 4, 6, and 10.<br/><br/>
+
+    <b>Claim Group 4: Transparent formulas can provide practical decision value.</b><br/>
+    Supporting Sources: DSS theory corpus and explainability literature (methodological references), implementation evidence.
+    Referenced In: Sections 4, 5, 8, and 12.<br/><br/>
+
+    <b>Claim Group 5: The prototype is extensible to production with measured roadmap stages.</b><br/>
+    Supporting Sources: Implementation resources, software engineering lifecycle practice, and documented system constraints.
+    Referenced In: Sections 11 and 14.<br/><br/>
+
+    <b>Review Benefit</b><br/>
+    Source traceability reduces ambiguity in thesis defense by explicitly connecting conceptual claims, design decisions,
+    and empirical test outcomes to cited evidence and implementation artifacts.
+    """
+    story.append(Paragraph(references_page_5, body_style))
+    story.append(PageBreak())
+
+    story.append(Paragraph("13.6 Recommended Further Reading for Examiners", heading2_style))
+    references_page_6 = """
+    <b>A. Decision Support and Explainability</b><br/>
+    Suggested Focus: Interpretable model design, managerial trust in analytics, and governance of decision systems.
+    Relevance to this thesis: Strengthens the argument for transparent formulas and role-appropriate reporting.<br/><br/>
+
+    <b>B. People Analytics and Workforce Strategy</b><br/>
+    Suggested Focus: Links between retention, leadership quality, organizational culture, and measurable performance outcomes.
+    Relevance to this thesis: Supports weighting and inclusion of people-centered features in Organizational Health Index.<br/><br/>
+
+    <b>C. Corporate Distress and Turnaround Management</b><br/>
+    Suggested Focus: Early warning indicators, restructuring sequencing, and capital structure effects on survival probability.
+    Relevance to this thesis: Supports risk verdict interpretation and intervention urgency recommendations.<br/><br/>
+
+    <b>D. Digital Transformation and Operational Resilience</b><br/>
+    Suggested Focus: Process formalization, documentation maturity, and adaptation under disruption.
+    Relevance to this thesis: Validates process fragility and key-person dependency as high-value risk dimensions.<br/><br/>
+
+    <b>E. Research Extension Path</b><br/>
+    Suggested Focus: Longitudinal validation datasets, cross-industry calibration, and causality analysis methods.
+    Relevance to this thesis: Directly aligned with future work roadmap and publication-oriented extension strategy.<br/><br/>
+
+    <b>Summary</b><br/>
+    These additional references and resource notes are included to strengthen academic grounding, improve reviewer traceability,
+    and provide a practical bridge from prototype implementation to reproducible, defensible research extension.
+    """
+    story.append(Paragraph(references_page_6, body_style))
     story.append(PageBreak())
     
     # ─────────────────────────────────────────────────────────────────────
