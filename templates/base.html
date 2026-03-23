@@ -15,13 +15,36 @@
             <a class="brand" href="{{ url_for('home') }}">HR Insight Lab</a>
             <nav>
                 <a href="{{ url_for('home') }}">Home</a>
+                {% if current_user %}
                 <a href="{{ url_for('analysis') }}">AI Analysis</a>
-                <a href="{{ url_for('dashboard', role='ceo') }}">Dashboards</a>
+                <a href="{{ url_for('history') }}">History</a>
+                <a href="{{ url_for('dashboard', role=current_user.role if current_user.role != 'admin' else 'ceo') }}">Dashboards</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+                {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+                {% endif %}
             </nav>
         </div>
     </header>
 
     <main class="container page-enter">
+        {% if current_user %}
+        <div class="user-bar">
+            <span>Signed in as {{ current_user.full_name }}</span>
+            <span class="user-role-pill">{{ current_user.role|upper }}</span>
+        </div>
+        {% endif %}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-stack">
+                {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+
         {% block content %}{% endblock %}
     </main>
 

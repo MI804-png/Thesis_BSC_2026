@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="panel">
+    <p class="chip">Analysis History</p>
+    <h1>Stored Analysis Runs</h1>
+    <p class="lead">SQLite-backed history is enabled locally for trend tracking, PDF export, and longitudinal review.</p>
+</section>
+
+{% if history_summary %}
+<section class="grid three history-summary-grid">
+    <article class="panel soft-stat">
+        <p class="stat-label">Saved Runs</p>
+        <h2>{{ history_summary.total }}</h2>
+    </article>
+    <article class="panel soft-stat">
+        <p class="stat-label">Average Probability</p>
+        <h2>{{ history_summary.avg_probability }}%</h2>
+    </article>
+    <article class="panel soft-stat">
+        <p class="stat-label">Average OHI</p>
+        <h2>{{ history_summary.avg_ohi }}</h2>
+    </article>
+</section>
+{% endif %}
+
+<section class="panel">
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Company</th>
+                    <th>Source</th>
+                    <th>Probability</th>
+                    <th>OHI</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.id }}</td>
+                    <td>{{ record.company_name }}</td>
+                    <td>{{ record.source|title }}</td>
+                    <td>{{ record.result.prediction.probability }}%</td>
+                    <td>{{ record.result.ohi }}</td>
+                    <td>{{ record.created_at[:19].replace('T', ' ') }}</td>
+                    <td><a class="table-action" href="{{ url_for('export_analysis_pdf', analysis_id=record.id) }}">PDF</a></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7">No saved analyses yet. Run the AI Analysis workflow to create local history.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

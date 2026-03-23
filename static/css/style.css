@@ -242,6 +242,341 @@ nav a:hover {
     border-color: var(--primary);
 }
 
+.dashboard-caption {
+    margin-top: 6px;
+    color: var(--muted);
+}
+
+.dashboard-kpi-grid {
+    margin-top: 18px;
+}
+
+.dashboard-kpi-card {
+    transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.dashboard-kpi-card.is-active {
+    border-color: var(--primary);
+    box-shadow: 0 10px 22px rgba(15, 118, 110, 0.14);
+    transform: translateY(-2px);
+}
+
+.kpi-trigger {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+}
+
+.kpi-trigger:hover,
+.kpi-trigger[aria-pressed="true"] {
+    color: var(--primary);
+}
+
+.dashboard-score-panel {
+    margin-top: 18px;
+    display: grid;
+    gap: 18px;
+    grid-template-columns: 1.8fr 0.8fr;
+    align-items: center;
+    background: linear-gradient(135deg, #fff8eb, #e7f4f1);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.dashboard-panel-label {
+    margin: 0 0 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary);
+}
+
+.dashboard-panel-title {
+    margin: 0;
+}
+
+.dashboard-panel-detail {
+    margin: 10px 0 0;
+    color: var(--muted);
+}
+
+.dashboard-score-box {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 14px;
+}
+
+.dashboard-score-number {
+    margin: 0;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.dashboard-score-band {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.user-bar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
+.user-role-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #edf8f6;
+    border: 1px solid var(--border);
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.flash-stack {
+    display: grid;
+    gap: 10px;
+    margin: 14px 0;
+}
+
+.flash {
+    border-radius: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+}
+
+.flash-success {
+    background: #e7f5ec;
+    color: var(--ok);
+}
+
+.flash-warning {
+    background: #fff4df;
+    color: var(--warning);
+}
+
+.flash-danger {
+    background: #fee8e8;
+    color: var(--danger);
+}
+
+.auth-shell {
+    display: grid;
+    grid-template-columns: 1.4fr 0.8fr;
+    gap: 18px;
+}
+
+.auth-form label,
+.compact-form label,
+.analysis-shell-form label {
+    display: block;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.auth-form input,
+.compact-form input,
+.compact-form select,
+.analysis-shell-form input,
+.analysis-shell-form select {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 10px;
+    font-size: 0.95rem;
+    background: #fffdfa;
+}
+
+.panel-soft {
+    background: linear-gradient(145deg, #fff9ef, #eef7f4);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.demo-user-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 18px;
+}
+
+.demo-user-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+}
+
+.demo-user-card h3,
+.demo-user-card p {
+    margin: 0 0 6px;
+}
+
+.utility-grid {
+    align-items: start;
+}
+
+.utility-card {
+    min-height: 100%;
+}
+
+.compact-form {
+    display: grid;
+    gap: 12px;
+}
+
+.mini-label {
+    margin: 0 0 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.csv-hint {
+    margin-top: 8px;
+}
+
+.section-gap-top {
+    margin-top: 10px;
+}
+
+.analysis-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin: 4px 0 10px;
+}
+
+.split-head,
+.batch-meta,
+.dashboard-meta-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.dashboard-meta-bar {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: #f5efe2;
+    color: var(--muted);
+}
+
+.soft-stat h2,
+.utility-card h2 {
+    margin-bottom: 0;
+}
+
+.stat-label {
+    margin: 0;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.8rem;
+}
+
+.table-action {
+    color: var(--primary);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.btn-compact {
+    margin-top: 10px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+}
+
+.ml-panel h2 {
+    font-size: 2.2rem;
+    color: var(--primary);
+}
+
+.future-work-panel {
+    margin-top: 20px;
+}
+
+.future-work-grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 16px;
+}
+
+.future-work-card {
+    background: linear-gradient(145deg, #fff9ef, #eef7f4);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+}
+
+.future-work-top {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.future-work-top h3 {
+    margin: 0;
+}
+
+.future-work-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 72px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+}
+
+.future-work-card.priority-high .future-work-badge {
+    background: #dff5ec;
+    color: #0f766e;
+    border-color: #b7e5d7;
+}
+
+.future-work-card.priority-medium .future-work-badge {
+    background: #fff1d6;
+    color: #9a6700;
+    border-color: #f2d79f;
+}
+
+.future-work-card.priority-future .future-work-badge {
+    background: #ecebff;
+    color: #4f46e5;
+    border-color: #cfcafc;
+}
+
 .site-footer {
     padding: 16px 0 22px;
     color: var(--muted);
@@ -267,6 +602,8 @@ nav a:hover {
 
 @media (max-width: 960px) {
     .hero,
+    .dashboard-score-panel,
+    .future-work-grid,
     .grid.two,
     .grid.three,
     .grid.four {

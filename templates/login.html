@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="panel auth-shell">
+    <div class="auth-intro">
+        <p class="chip">Local Access</p>
+        <h1>Sign In to the Thesis Workspace</h1>
+        <p class="lead">
+            Local authentication is enabled so dashboards and saved analyses respect role-based access.
+            Use one of the seeded demo accounts below or sign in with an existing local user.
+        </p>
+        <div class="demo-user-grid">
+            {% for user in demo_users %}
+            <article class="demo-user-card">
+                <h3>{{ user.full_name }}</h3>
+                <p><strong>User:</strong> {{ user.username }}</p>
+                <p><strong>Password:</strong> {{ user.password }}</p>
+                <p><strong>Role:</strong> {{ user.role|upper }}</p>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+
+    <form method="post" class="auth-form panel-soft">
+        <h2>Local Login</h2>
+        <label>Username
+            <input type="text" name="username" placeholder="e.g. finance" required>
+        </label>
+        <label>Password
+            <input type="password" name="password" placeholder="Enter local password" required>
+        </label>
+        <button class="btn btn-primary" type="submit">Sign In</button>
+    </form>
+</section>
+{% endblock %}

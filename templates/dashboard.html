@@ -1,25 +1,56 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% set initial_kpi = role.kpis[0] %}
 <section class="panel">
     <p class="chip">Role Dashboard</p>
     <h1>{{ role.title }}</h1>
     <p class="lead">{{ role.goal }}</p>
+    <p class="dashboard-caption">Click a KPI word to view its calculated score and management focus.</p>
 
-    <div class="grid three">
+    {% if latest_analysis %}
+    <div class="dashboard-meta-bar">
+        <span>Using latest saved analysis for {{ latest_analysis.company_name }}</span>
+        <span>{{ latest_analysis.created_at[:19].replace('T', ' ') }}</span>
+    </div>
+    {% endif %}
+
+    <div class="grid three dashboard-kpi-grid">
         {% for kpi in role.kpis %}
-        <article class="card">
-            <h3>{{ kpi }}</h3>
-            <p>Use this KPI to monitor trend movement and support strategy checkpoints.</p>
+        <article class="card dashboard-kpi-card{% if loop.first %} is-active{% endif %}">
+            <h3>
+                <button
+                    type="button"
+                    class="kpi-trigger"
+                    data-kpi-name="{{ kpi.name }}"
+                    data-kpi-score="{{ kpi.score }}"
+                    data-kpi-band="{{ kpi.band }}"
+                    data-kpi-summary="{{ kpi.summary }}"
+                    data-kpi-detail="{{ kpi.detail }}"
+                    aria-pressed="{% if loop.first %}true{% else %}false{% endif %}"
+                >{{ kpi.name }}</button>
+            </h3>
+            <p>{{ kpi.summary }}</p>
         </article>
         {% endfor %}
     </div>
 
+    <section class="dashboard-score-panel" data-dashboard-panel>
+        <div>
+            <p class="dashboard-panel-label">Selected KPI</p>
+            <h2 class="dashboard-panel-title" data-kpi-title>{{ initial_kpi.name }}</h2>
+            <p class="dashboard-panel-detail" data-kpi-detail>{{ initial_kpi.detail }}</p>
+        </div>
+        <div class="dashboard-score-box">
+            <p class="dashboard-score-number" data-kpi-score>{{ initial_kpi.score }}</p>
+            <p class="dashboard-score-band" data-kpi-band>{{ initial_kpi.band }}</p>
+        </div>
+    </section>
+
     <div class="dashboard-links">
-        <a class="btn btn-outline" href="{{ url_for('dashboard', role='ceo') }}">CEO</a>
-        <a class="btn btn-outline" href="{{ url_for('dashboard', role='hr') }}">HR</a>
-        <a class="btn btn-outline" href="{{ url_for('dashboard', role='finance') }}">Finance</a>
-        <a class="btn btn-outline" href="{{ url_for('dashboard', role='operations') }}">Operations</a>
+        {% for role_name in ['ceo', 'hr', 'finance', 'operations'] %}
+        <a class="btn btn-outline" href="{{ url_for('dashboard', role=role_name) }}">{{ role_name|upper }}</a>
+        {% endfor %}
     </div>
 </section>
 {% endblock %}

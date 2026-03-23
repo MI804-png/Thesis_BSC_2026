@@ -166,9 +166,9 @@ SECTIONS = {
                         ["Risk & Operations", "Debt Ratio Pressure", "Debt-free, no financial concentration"],
                         ["Risk & Operations", "Process Fragility", "Fully documented, resilient processes"],
                         ["Risk & Operations", "Dependency Index", "No single-person or vendor dependency"],
-                        ["Financial", "Profit Margin", "Maximum observed industry margin"],
+                        ["Financial", "Current Asset Change", "Strong positive movement in current assets"],
                         ["Financial", "Revenue Growth", "Strong, sustained top-line growth"],
-                        ["Financial", "Cash Runway", "Multi-year cash buffer with no burn concerns"],
+                        ["Financial", "Cash Flow Change", "Strong positive cash flow trend with healthy liquidity"],
                     ],
                 },
             },
@@ -193,8 +193,8 @@ SECTIONS = {
                     },
                     {
                         "name": "Financial Stability Composite (FSC)",
-                        "formula": "FSC = (Margin × 0.35) + (Revenue Growth × 0.35) + (Cash Runway × 0.30)",
-                        "rationale": "Growth and margin are weighted equally as complementary health signals.",
+                        "formula": "FSC = (Current Asset Change × 0.35) + (Revenue Growth × 0.35) + (Cash Flow Change × 0.30)",
+                        "rationale": "Growth and financial movement indicators are weighted as complementary health signals.",
                     },
                     {
                         "name": "Organisational Health Index (OHI)",
@@ -326,7 +326,7 @@ SECTIONS = {
                     },
                     {
                         "scenario": "Financially stressed enterprise",
-                        "inputs": "Margin 20, Growth 15, Cash Runway 25, Debt 80",
+                        "inputs": "Current Asset Change 20, Growth 15, Cash Flow Change 25, Debt 80",
                         "expected": "FSC ≤ 25 — Financial stability insight triggered",
                         "result": "FSC 19.75 — Passed",
                     },

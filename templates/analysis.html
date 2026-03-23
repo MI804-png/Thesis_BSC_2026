@@ -1,121 +1,210 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="panel">
+<section class="panel analysis-hero">
     <p class="chip">Universal Company Assessment</p>
-    <h1>HR &amp; Organizational Analysis Tool</h1>
+    <h1>AI Analysis Workspace</h1>
     <p class="lead">
-        Enter real company data below. The system normalises your inputs internally,
-        computes four evidence-based KPIs, and generates a <strong>Success / Failure Prediction</strong>
-        with strategic recommendations — applicable to any organisation worldwide.
+        This local workspace now includes authenticated access, SQLite-backed history, CSV batch ingestion,
+        PDF report export, demo HRIS imports, and a machine-learning probability model alongside the original
+        transparent KPI engine.
     </p>
 </section>
 
-<form method="post">
-<section class="panel">
-    <h2>Company Profile</h2>
-    <div class="grid three">
-        <label>Company Name
-            <input type="text" name="company_name" placeholder="e.g. Acme Corp" maxlength="80">
-        </label>
-        <label>Industry
-            <select name="industry">
-                <option value="general">General / Other</option>
-                <option value="technology">Technology</option>
-                <option value="saas">SaaS / Software</option>
-                <option value="manufacturing">Manufacturing</option>
-                <option value="retail">Retail / E-commerce</option>
-                <option value="healthcare">Healthcare</option>
-                <option value="finance">Financial Services</option>
-                <option value="consulting">Consulting / Services</option>
-                <option value="energy">Energy / Utilities</option>
-                <option value="logistics">Logistics / Supply Chain</option>
-            </select>
-        </label>
-        <label>Company Stage
-            <select name="stage">
-                <option value="startup">Start-up (0–3 yrs)</option>
-                <option value="growth" selected>Growth (3–7 yrs)</option>
-                <option value="mature">Mature (7+ yrs)</option>
-                <option value="turnaround">Turnaround / Recovery</option>
-            </select>
-        </label>
-    </div>
-    <div class="grid three" style="margin-top:10px">
-        <label>Number of Employees
-            <input type="number" name="employee_count" min="1" value="120"
-                   placeholder="e.g. 250">
-        </label>
-    </div>
+<section class="grid three utility-grid">
+    <article class="panel utility-card">
+        <p class="mini-label">Machine Learning Scoring</p>
+        <h2>{{ model_summary.name }}</h2>
+        <p>Training samples: {{ model_summary.training_samples }}</p>
+        <p>R²: {{ model_summary.r2 }} | MAE: {{ model_summary.mae }}</p>
+    </article>
+
+    <article class="panel utility-card">
+        <p class="mini-label">Real-Time HR Data Integration</p>
+        <form method="post" class="compact-form">
+            <input type="hidden" name="action" value="import-provider">
+            <label>Import provider
+                <select name="provider">
+                    {% for provider in providers %}
+                    <option value="{{ provider.key }}">{{ provider.label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <button class="btn btn-outline" type="submit">Load Demo Feed</button>
+        </form>
+    </article>
+
+    <article class="panel utility-card">
+        <p class="mini-label">CSV Bulk Ingestion Pipeline</p>
+        <form method="post" enctype="multipart/form-data" class="compact-form">
+            <input type="hidden" name="action" value="csv-upload">
+            <label>Upload CSV
+                <input type="file" name="csv_file" accept=".csv" required>
+            </label>
+            <button class="btn btn-outline" type="submit">Run Batch Analysis</button>
+        </form>
+        <p class="field-hint csv-hint">Headers: company_name, industry, stage, employee_count, leadership_years, digital_score, retention_pct, churn_pct, dte_ratio, doc_score, dep_score, margin_pct, growth_pct, cash_months</p>
+    </article>
 </section>
 
-<section class="panel">
-    <h2>Leadership &amp; People</h2>
-    <div class="grid three">
-        <label>Avg. Senior Leadership Experience
-            <span class="field-hint">Years in senior/C-suite roles</span>
-            <input type="number" name="leadership_years" min="0" max="40" value="8" step="0.5" required>
-        </label>
-        <label>Digital Maturity
-            <span class="field-hint">Self-assessment 1 (low) — 10 (high)</span>
-            <input type="number" name="digital_score" min="1" max="10" value="6" step="0.5" required>
-        </label>
-        <label>Employee Retention Rate
-            <span class="field-hint">Annual retention % (e.g. 85 means 15% left)</span>
-            <input type="number" name="retention_pct" min="0" max="100" value="80" required>
-        </label>
-    </div>
-</section>
+<form method="post" class="analysis-shell-form">
+    <input type="hidden" name="action" value="run-analysis">
 
-<section class="panel">
-    <h2>Risk &amp; Operations</h2>
-    <div class="grid four">
-        <label>Annual Churn Rate
-            <span class="field-hint">Staff or customer churn %</span>
-            <input type="number" name="churn_pct" min="0" max="100" value="15" required>
-        </label>
-        <label>Debt-to-Equity Ratio
-            <span class="field-hint">e.g. 0.5, 1.0, 2.5</span>
-            <input type="number" name="dte_ratio" min="0" max="10" value="0.8" step="0.1" required>
-        </label>
-        <label>Process Documentation
-            <span class="field-hint">1 (undocumented) — 10 (fully documented)</span>
-            <input type="number" name="doc_score" min="1" max="10" value="6" step="0.5" required>
-        </label>
-        <label>Key-Person Dependency
-            <span class="field-hint">1 (no dep.) — 5 (highly dependent)</span>
-            <input type="number" name="dep_score" min="1" max="5" value="3" step="0.5" required>
-        </label>
-    </div>
-</section>
+    <section class="panel">
+        <h2>Company Profile</h2>
+        <div class="grid three">
+            <label>Company Name
+                <input type="text" name="company_name" value="{{ form_data.company_name }}" placeholder="e.g. Acme Corp" maxlength="80">
+            </label>
+            <label>Industry
+                <select name="industry">
+                    {% for option in industry_options %}
+                    <option value="{{ option }}" {% if form_data.industry == option %}selected{% endif %}>{{ option.replace('_', ' ')|title }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Company Stage
+                <select name="stage">
+                    {% for option in stage_options %}
+                    <option value="{{ option }}" {% if form_data.stage == option %}selected{% endif %}>{{ option.replace('_', ' ')|title }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+        <div class="grid three section-gap-top">
+            <label>Number of Employees
+                <input type="number" name="employee_count" min="1" value="{{ form_data.employee_count }}" placeholder="e.g. 250">
+            </label>
+        </div>
+    </section>
 
-<section class="panel">
-    <h2>Financial Performance</h2>
-    <div class="grid three">
-        <label>Operating Profit Margin
-            <span class="field-hint">% — can be negative (e.g. -5)</span>
-            <input type="number" name="margin_pct" min="-20" max="60" value="10" required>
-        </label>
-        <label>Annual Revenue Growth
-            <span class="field-hint">% year-on-year (e.g. 18)</span>
-            <input type="number" name="growth_pct" min="-30" max="100" value="15" required>
-        </label>
-        <label>Cash Runway
-            <span class="field-hint">Number of months at current burn</span>
-            <input type="number" name="cash_months" min="0" max="60" value="18" required>
-        </label>
-    </div>
-</section>
+    <section class="panel">
+        <h2>Leadership &amp; People</h2>
+        <div class="grid three">
+            <label>Avg. Senior Leadership Experience
+                <span class="field-hint">Years in senior/C-suite roles</span>
+                <input type="number" name="leadership_years" min="0" max="40" value="{{ form_data.leadership_years }}" step="0.5" required>
+            </label>
+            <label>Digital Maturity
+                <span class="field-hint">Self-assessment 1 (low) — 10 (high)</span>
+                <input type="number" name="digital_score" min="1" max="10" value="{{ form_data.digital_score }}" step="0.5" required>
+            </label>
+            <label>Employee Retention Rate
+                <span class="field-hint">Annual retention %</span>
+                <input type="number" name="retention_pct" min="0" max="100" value="{{ form_data.retention_pct }}" required>
+            </label>
+        </div>
+    </section>
 
-<div style="text-align:right; margin: 4px 0 10px">
-    <button class="btn btn-primary" type="submit" style="font-size:1rem; padding:12px 28px;">
-        Run Analysis &amp; Predict
-    </button>
-</div>
+    <section class="panel">
+        <h2>Risk &amp; Operations</h2>
+        <div class="grid four">
+            <label>Annual Churn Rate
+                <span class="field-hint">Staff or customer churn %</span>
+                <input type="number" name="churn_pct" min="0" max="100" value="{{ form_data.churn_pct }}" required>
+            </label>
+            <label>Debt-to-Equity Ratio
+                <span class="field-hint">e.g. 0.5, 1.0, 2.5</span>
+                <input type="number" name="dte_ratio" min="0" max="10" value="{{ form_data.dte_ratio }}" step="0.1" required>
+            </label>
+            <label>Process Documentation
+                <span class="field-hint">1 (undocumented) — 10 (fully documented)</span>
+                <input type="number" name="doc_score" min="1" max="10" value="{{ form_data.doc_score }}" step="0.5" required>
+            </label>
+            <label>Key-Person Dependency
+                <span class="field-hint">1 (no dep.) — 5 (highly dependent)</span>
+                <input type="number" name="dep_score" min="1" max="5" value="{{ form_data.dep_score }}" step="0.5" required>
+            </label>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Financial Performance</h2>
+        <div class="grid three">
+            <label>Current Asset Change
+                <span class="field-hint">% change over the selected reporting period</span>
+                <input type="number" name="margin_pct" min="-100" max="100" value="{{ form_data.margin_pct }}" required>
+            </label>
+            <label>Annual Revenue Growth
+                <span class="field-hint">% year-on-year</span>
+                <input type="number" name="growth_pct" min="-30" max="100" value="{{ form_data.growth_pct }}" required>
+            </label>
+            <label>Cash Flow Change
+                <span class="field-hint">% change over the selected reporting period</span>
+                <input type="number" name="cash_months" min="-100" max="100" value="{{ form_data.cash_months }}" required>
+            </label>
+        </div>
+    </section>
+
+    <div class="analysis-actions">
+        <button class="btn btn-primary" type="submit">Run Analysis &amp; Save Locally</button>
+    </div>
 </form>
 
+<section class="panel future-work-panel">
+    <p class="chip">5.5 Future Work</p>
+    <h2>Implemented Locally in This Prototype</h2>
+    <p class="lead">The following extensions now exist as local prototype features inside the analysis workspace.</p>
+    <div class="future-work-grid">
+        {% for item in future_work %}
+        <article class="future-work-card priority-{{ item.priority | lower }}">
+            <div class="future-work-top">
+                <h3>{{ item.title }}</h3>
+                <span class="future-work-badge">{{ item.priority }}</span>
+            </div>
+            <p>{{ item.detail }}</p>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+
+{% if batch_result %}
+<section class="panel">
+    <div class="split-head">
+        <div>
+            <p class="chip">Batch Analysis</p>
+            <h2>{{ batch_result.filename }}</h2>
+        </div>
+        <div class="batch-meta">
+            <span>{{ batch_result.count }} rows</span>
+            <span>Average probability: {{ batch_result.average_probability }}%</span>
+        </div>
+    </div>
+    {% if batch_result.top_company %}
+    <p class="lead">Top ranked company: {{ batch_result.top_company.company_name }} with OHI {{ batch_result.top_company.ohi }}.</p>
+    {% endif %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Row</th>
+                    <th>Company</th>
+                    <th>Probability</th>
+                    <th>OHI</th>
+                    <th>Verdict</th>
+                    <th>Validation Notes</th>
+                    <th>PDF</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in batch_result.rows %}
+                <tr>
+                    <td>{{ row.row_number }}</td>
+                    <td>{{ row.company_name }}</td>
+                    <td>{{ row.probability }}%</td>
+                    <td>{{ row.ohi }}</td>
+                    <td>{{ row.verdict }}</td>
+                    <td>{{ row.notes|join(', ') if row.notes else 'Clean' }}</td>
+                    <td><a class="table-action" href="{{ url_for('export_analysis_pdf', analysis_id=row.analysis_id) }}">PDF</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
+
 {% if result %}
-{# ── Verdict banner ──────────────────────────────────────────────────────── #}
 <section class="verdict-banner {{ result.prediction.verdict_class }}">
     <div class="verdict-left">
         <p class="verdict-company">{{ result.company_name }}
@@ -127,42 +216,77 @@
     </div>
     <div class="verdict-prob">
         <p class="prob-number">{{ result.prediction.probability }}<span>%</span></p>
-        <p class="prob-label">Success Probability</p>
+        <p class="prob-label">Rule-Based Probability</p>
+        <a class="btn btn-outline btn-compact" href="{{ url_for('export_analysis_pdf', analysis_id=result.analysis_id) }}">Export PDF</a>
     </div>
 </section>
 
-{# ── Four KPI scores ─────────────────────────────────────────────────────── #}
+<section class="grid two">
+    <article class="panel ml-panel">
+        <p class="chip">Machine Learning Scoring</p>
+        <h2>{{ result.ml_prediction.probability }}%</h2>
+        <p>{{ result.ml_prediction.explanation }}</p>
+        <p class="field-hint">Model: {{ result.ml_prediction.model_name }} | Training samples: {{ result.ml_prediction.training_samples }} | R²: {{ result.ml_prediction.r2 }} | MAE: {{ result.ml_prediction.mae }}</p>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Driver</th>
+                        <th>Value</th>
+                        <th>Contribution</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in result.ml_prediction.top_contributors %}
+                    <tr>
+                        <td>{{ item.label }}</td>
+                        <td>{{ item.value }}</td>
+                        <td>{{ '%+.2f'|format(item.contribution) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="panel">
+        <h2>Trend Tracking</h2>
+        {% if company_trend %}
+        <p><strong>{{ company_trend.company_name }}</strong> has {{ company_trend.runs }} saved runs.</p>
+        <p>OHI change: {{ company_trend.delta_ohi }}</p>
+        <p>Probability change: {{ company_trend.delta_probability }}%</p>
+        {% else %}
+        <p>No multi-run trend available yet for this company. Run another saved analysis to compare trajectories.</p>
+        {% endif %}
+    </article>
+</section>
+
 <section class="panel">
     <h2>KPI Breakdown</h2>
     <div class="grid four score-grid">
         <article class="score-card">
             <h3>Leadership Readiness</h3>
             <p class="score">{{ result.lrs }}</p>
-            <div class="score-bar"><div class="score-fill" style="width:{{ result.lrs }}%"></div></div>
-            <span class="score-band band-{{ result.lrs_band | lower | replace(' ','-') }}">{{ result.lrs_band }}</span>
+            <span class="score-band">{{ result.lrs_band }}</span>
         </article>
         <article class="score-card">
             <h3>Scaling Risk</h3>
             <p class="score score-risk">{{ result.srs }}</p>
-            <div class="score-bar"><div class="score-fill fill-risk" style="width:{{ result.srs }}%"></div></div>
-            <span class="score-band band-{{ result.srs_band | lower }}">{{ result.srs_band }} Risk</span>
+            <span class="score-band">{{ result.srs_band }} Risk</span>
         </article>
         <article class="score-card">
             <h3>Financial Stability</h3>
             <p class="score">{{ result.fsc }}</p>
-            <div class="score-bar"><div class="score-fill" style="width:{{ result.fsc }}%"></div></div>
-            <span class="score-band band-{{ result.fsc_band | lower | replace(' ','-') }}">{{ result.fsc_band }}</span>
+            <span class="score-band">{{ result.fsc_band }}</span>
         </article>
         <article class="score-card score-ohi">
             <h3>Org. Health Index</h3>
             <p class="score">{{ result.ohi }}</p>
-            <div class="score-bar"><div class="score-fill fill-ohi" style="width:{{ result.ohi }}%"></div></div>
-            <span class="score-band band-{{ result.ohi_band | lower | replace(' ','-') }}">{{ result.ohi_band }}</span>
+            <span class="score-band">{{ result.ohi_band }}</span>
         </article>
     </div>
 </section>
 
-{# ── Insights + Inputs ───────────────────────────────────────────────────── #}
 <div class="grid two">
     <section class="panel">
         <h2>Strategic Recommendations</h2>
@@ -173,7 +297,7 @@
         </ul>
     </section>
     <section class="panel">
-        <h2>Your Inputs (Normalised)</h2>
+        <h2>Submitted Inputs</h2>
         <table class="data-table">
             <tbody>
                 {% for label, val in result.display_inputs %}
@@ -183,18 +307,53 @@
         </table>
     </section>
 </div>
+{% endif %}
 
-{# ── Model transparency ──────────────────────────────────────────────────── #}
 <section class="panel">
-    <h2>How the Model Works</h2>
-    <p>{{ result.explanation }}</p>
-    <div class="grid four" style="margin-top:12px">
-        <div class="formula-mini"><strong>LRS</strong><code>Lead×0.4 + Digital×0.3 + Retention×0.3</code></div>
-        <div class="formula-mini"><strong>SRS</strong><code>Churn×0.30 + Debt×0.25 + Fragility×0.25 + Dep×0.20</code></div>
-        <div class="formula-mini"><strong>FSC</strong><code>Margin×0.35 + Growth×0.35 + Cash×0.30</code></div>
-        <div class="formula-mini"><strong>OHI</strong><code>LRS×0.40 + (100−SRS)×0.35 + FSC×0.25</code></div>
+    <div class="split-head">
+        <div>
+            <p class="chip">Persistent Database Integration</p>
+            <h2>Recent Local History</h2>
+        </div>
+        <a class="btn btn-outline" href="{{ url_for('history') }}">Open Full History</a>
+    </div>
+    {% if history_summary %}
+    <p class="lead">{{ history_summary.total }} saved runs | Average probability {{ history_summary.avg_probability }}% | Average OHI {{ history_summary.avg_ohi }}</p>
+    {% else %}
+    <p class="lead">No saved analyses yet.</p>
+    {% endif %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Company</th>
+                    <th>Source</th>
+                    <th>Probability</th>
+                    <th>OHI</th>
+                    <th>Created</th>
+                    <th>PDF</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in recent_analyses %}
+                <tr>
+                    <td>{{ record.id }}</td>
+                    <td>{{ record.company_name }}</td>
+                    <td>{{ record.source|title }}</td>
+                    <td>{{ record.result.prediction.probability }}%</td>
+                    <td>{{ record.result.ohi }}</td>
+                    <td>{{ record.created_at[:19].replace('T', ' ') }}</td>
+                    <td><a class="table-action" href="{{ url_for('export_analysis_pdf', analysis_id=record.id) }}">PDF</a></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7">Saved runs will appear here after you execute a manual or CSV analysis.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </section>
-{% endif %}
 {% endblock %}
 
