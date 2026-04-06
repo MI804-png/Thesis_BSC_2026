@@ -1,7 +1,6 @@
 """
-analysis_engine.py — HR Decision Support System
-Accepts real-world company inputs, normalises them internally to a 0-100 scale,
-computes four KPIs, and generates an organisational success/failure prediction.
+analysis_engine.py
+This is where I put the actual math. It takes the form data, cleans it up, and runs it through my weighted formulas.
 """
 from __future__ import annotations
 

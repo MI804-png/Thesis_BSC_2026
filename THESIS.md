@@ -9,20 +9,16 @@
 
 ## Executive Summary
 
-This thesis presents the design and implementation of a comprehensive, data-driven HR and management decision support system (DSS) that addresses a critical gap in how organizations assess their health and readiness.
+I built this Decision Support System (DSS) to solve a specific problem I noticed in modern management: we have plenty of data, but very little actual insight. Most companies track payroll and hiring, but they can't answer if their leadership is ready for a crisis or if their growth is actually sustainable.
 
-The problem is straightforward: most organizations have access to HR and financial data, but lack a transparent, unified framework for turning that data into actionable strategic insights. Commercial platforms like SAP SuccessFactors and Workday excel at handling transactions—payroll, benefits, hiring—but provide limited support for the kind of strategic questions leaders actually need answered: "Is our organization ready to scale?" "Where is our greatest risk?" "How healthy are we, really?"
-
-This system answers those questions through a transparent, open-source platform that integrates leadership, operational, and financial data into four core metrics:
+My project, the HR Insight Lab, bridges the gap between raw HR numbers and high-level strategy. Unlike big-box platforms like Workday or SAP—which are great for transactions but often feel like a "black box" when it comes to analytics—my system is fully transparent. I’ve integrated leadership, operational, and financial metrics into four primary signals:
 
 - **Leadership Readiness Score** – Can our leadership bench support growth and handle crisis?
 - **Scaling Risk Score** – How much pressure will growth place on our people, processes, and finances?
 - **Financial Stability Composite** – Do we have the capital and cash reserves to sustain operations and invest?
 - **Organizational Health Index** – Overall organizational resilience across all dimensions.
 
-The implementation is a lightweight Flask web application with role-based dashboards, persistent SQLite storage, a machine-learning scoring layer, CSV batch processing, and PDF report generation. The system has been tested, validated, and is ready to deploy locally or to production infrastructure.
-
-The research contributes an open, auditable alternative to opaque commercial platforms and demonstrates that transparent, evidence-based organizational assessment is both feasible and practical for organizations of any size.
+I implemented this as a Flask-based web app. It’s got everything a manager needs: role-based dashboards, a local ML layer for second opinions, and automated PDF reporting. I’ve tested it against real-world scenarios to make sure the scores actually make sense.
 
 ---
 
@@ -30,12 +26,13 @@ The research contributes an open, auditable alternative to opaque commercial pla
 
 ### 1.1 The Problem
 
-Managers make strategic decisions with incomplete information. Every day, leaders across organizations choose whether to hire, restructure, invest, or cut costs—decisions that affect hundreds of people and millions in capital. Yet the tools available to support these decisions are often limited:
+Decision-makers are often flying blind. Every day, CEOs and HR heads make choices about restructuring or investing millions of dollars, yet they usually rely on "gut feeling" or siloed reports. HR looks at turnover, Finance looks at the balance sheet, and Operations looks at documentation—but they rarely talk to each other.
 
-- **HR teams** see hiring, retention, and engagement data, but struggle to connect those measures to overall organizational viability.
-- **Finance teams** monitor profitability, cash flow, and debt, but lack visibility into the people-side risks that often precede financial distress.
-- **Operations teams** manage day-to-day execution, but need better signals about when processes are becoming fragile or when scaling is creating bottlenecks.
-- **Executive teams** must make strategic bets with minimal structured analysis of organizational readiness.
+The tools we have right now aren't helping enough. Commercial platforms have three massive flaws that I wanted to fix:
+
+1. **You can't see the "why":** When a tool says your risk is 60%, you just have to trust it. I wanted a system where every formula is visible and auditable.
+2. **Information Silos:** Most tools only look at one thing. My goal was to pull HR, Finance, and Ops data into a single view.
+3. **Too Expensive:** Enterprise analytics cost a fortune. I wanted to prove that a lightweight, open-source tool can provide the same value.
 
 Commercial HRIS and analytics platforms promise to solve this, but they have three persistent problems:
 
@@ -659,4 +656,3 @@ The analysis form pre-fills with safe, reasonable defaults:
 ```
 
 These represent a typical mid-stage growth company with balanced metrics across all domains.
-

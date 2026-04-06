@@ -4,12 +4,10 @@ SECTIONS = {
         "title": "Introduction and Problem Definition",
         "subtitle": "Motivation, scope, and research objectives",
         "overview": (
-            "Modern enterprises operate under conditions of rapid change, increasing workforce complexity, and "
-            "mounting pressure to justify strategic HR investments with measurable evidence. Despite widespread "
-            "adoption of HR software, the majority of deployments remain transactional — focused on payroll, "
-            "attendance, and contract records. This creates a critical gap: managers lack timely, structured "
-            "analytical signals when making decisions about leadership succession, budget allocation, operational "
-            "restructuring, or organizational scaling."
+            "Running a company is hard, and it's getting harder. Most managers I've talked to have plenty of "
+            "software, but they still feel like they're guessing when it comes to big decisions. I designed "
+            "this project to turn transactional HR data into real strategic signals. My goal was to build a tool "
+            "that actually helps a CEO or an HR head see where their biggest risks are hiding."
         ),
         "content": [],
     },

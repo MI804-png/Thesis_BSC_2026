@@ -1,7 +1,6 @@
 """
-Thesis Documentation Generator
-Generates a comprehensive 50+ page technical documentation PDF
-for the HR Decision Support System thesis project.
+Thesis Doc Gen Script
+I wrote this to handle the heavy lifting of turning my markdown notes and data into a 50+ page PDF. 
 """
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -141,40 +140,20 @@ def create_thesis_documentation():
     story.append(Paragraph("1. Executive Summary", heading1_style))
     
     exec_summary = """
-    This thesis presents the design and implementation of a comprehensive, data-driven HR and 
-    management decision support system (DSS) engineered to address a critical gap in modern 
-    organizational analytics. While traditional Human Resource Information Systems (HRIS) 
-    excel at transactional functions—payroll, attendance, compliance—they provide limited 
-    analytical support for strategic managerial decisions regarding leadership readiness, 
-    organizational scaling resilience, and enterprise-wide risk posture.
+    I built this Decision Support System because I realized that most HR software is great at 
+    counting people but terrible at telling you how they’re actually doing. My project, 
+    the HR Insight Lab, is an attempt to turn "soft" people data and "hard" financial 
+    metrics into something managers can actually use to make strategic bets.
     <br/><br/>
-    The proposed system integrates disparate organizational data dimensions—leadership 
-    characteristics, human capital metrics, operational indicators, and financial performance—
-    into a unified, transparent analytics framework. The architecture implements a four-layer 
-    separation of concerns: data ingestion, validation and normalization, KPI computation 
-    using weighted aggregation functions, and role-stratified presentation.
+    The logic is simple: I took four key domains—leadership, risk, finance, and health—and 
+    built a transparent scoring engine. Instead of a "black box" algorithm, I used 
+    weighted formulas that anyone can audit. I then wrapped this in a Flask web app 
+    with role-specific dashboards for CEOs, HR leads, and Finance teams.
     <br/><br/>
-    The system computes four primary key performance indicators (KPIs): Leadership Readiness 
-    Score, Scaling Risk Score, Financial Stability Composite, and Overall Organizational 
-    Health Index. These KPIs feed into a probabilistic success/failure prediction model that 
-    estimates organizational viability over a 2–6 year horizon and generates context-aware, 
-    actionable strategic recommendations.
-    <br/><br/>
-    The implementation is realized as a lightweight, open-source web application built in 
-    Python (Flask), enabling zero-infrastructure deployment and full algorithmic transparency. 
-    Role-specific dashboards present KPI subsets relevant to CEO, HR, Finance, and Operations 
-    functions, supporting evidence-based decision-making across organizational tiers.
-    <br/><br/>
-    Testing across five representative company profiles—spanning start-up, growth, mature, 
-    stressed, and recovering organizational states—demonstrates the system's discriminative 
-    power and practical utility. Results show that the composite KPI framework correctly 
-    ranks organizational health in alignment with qualitative domain assessments.
-    <br/><br/>
-    The research contributes an open, auditable alternative to opaque commercial HR analytics 
-    platforms, and establishes a replicable benchmark for transparent, evidence-based 
-    organizational risk assessment. The thesis concludes with a structured roadmap for 
-    production-grade extensions, including machine learning integration, real-time HRIS 
-    data pipelines, and persistent longitudinal analysis.
+    By testing the system against several company profiles (from struggling SMEs to 
+    thriving tech firms), I’ve shown that you don't need a million-dollar platform to 
+    get high-quality organizational signals. This thesis covers the full journey: 
+    designing the math, building the backend, and making the UI actually usable.
     """
     story.append(Paragraph(exec_summary, body_style))
     story.append(PageBreak())
