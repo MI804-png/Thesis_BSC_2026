@@ -18,6 +18,7 @@
                 {% if current_user %}
                 <a href="{{ url_for('analysis') }}">AI Analysis</a>
                 <a href="{{ url_for('history') }}">History</a>
+                <a href="{{ url_for('market_context') }}">Market Context</a>
                 <a href="{{ url_for('dashboard', role=current_user.role if current_user.role != 'admin' else 'ceo') }}">Dashboards</a>
                 <a href="{{ url_for('logout') }}">Logout</a>
                 {% else %}

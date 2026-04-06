@@ -1180,3 +1180,276 @@ nav a:hover {
     }
 }
 
+/* ── Market Context Page ─────────────────────────────────── */
+
+.api-sources-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.api-badge {
+    background: rgba(125, 211, 252, 0.12);
+    border: 1px solid rgba(125, 211, 252, 0.3);
+    color: #7dd3fc;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+}
+
+.industry-select-form .grid.four {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+.industry-radio-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid transparent;
+    transition: background 0.15s, border-color 0.15s;
+    text-transform: capitalize;
+}
+
+.industry-radio-label:hover {
+    background: rgba(125, 211, 252, 0.1);
+    border-color: rgba(125, 211, 252, 0.25);
+}
+
+.industry-radio-label.is-selected {
+    background: rgba(125, 211, 252, 0.15);
+    border-color: #7dd3fc;
+    color: #e0f2ff;
+}
+
+.industry-radio-label input[type="radio"] {
+    accent-color: #7dd3fc;
+}
+
+.market-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+}
+
+.market-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.indicator-block {
+    background: rgba(255,255,255,0.04);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.indicator-desc {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.indicator-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.indicator-pill {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    background: rgba(125,211,252,0.08);
+    border: 1px solid rgba(125,211,252,0.2);
+    border-radius: 6px;
+    padding: 3px 9px;
+    font-size: 0.8rem;
+}
+
+.pill-year {
+    color: #94a3b8;
+    font-size: 0.72rem;
+}
+
+.pill-val {
+    color: #7dd3fc;
+    font-weight: 600;
+}
+
+.api-error {
+    color: #f87171 !important;
+}
+
+/* Teleport scores */
+.teleport-total-score {
+    font-size: 0.88rem;
+    color: #94a3b8;
+}
+
+.teleport-total-score .score-number {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #7dd3fc;
+    margin-left: 6px;
+}
+
+.teleport-score-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.teleport-score-row {
+    display: grid;
+    grid-template-columns: 160px 1fr 36px;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+}
+
+.ts-label {
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ts-bar-wrap {
+    background: rgba(255,255,255,0.07);
+    border-radius: 99px;
+    height: 6px;
+    overflow: hidden;
+}
+
+.ts-bar {
+    display: block;
+    height: 100%;
+    border-radius: 99px;
+    opacity: 0.85;
+}
+
+.ts-val {
+    color: #e2e8f0;
+    font-weight: 600;
+    text-align: right;
+}
+
+/* FX rates */
+.fx-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.fx-card {
+    text-align: center;
+    padding: 14px 10px;
+}
+
+.fx-currency {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #94a3b8;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.fx-rate {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #7dd3fc;
+    margin: 4px 0;
+}
+
+.fx-label {
+    font-size: 0.7rem;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Employee profiles */
+.employee-grid {
+    gap: 12px;
+}
+
+.employee-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+}
+
+.emp-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid rgba(125,211,252,0.3);
+}
+
+.emp-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.emp-name {
+    font-weight: 600;
+    font-size: 0.88rem;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.emp-title {
+    font-size: 0.76rem;
+    color: #7dd3fc;
+    margin: 0;
+}
+
+.emp-dept {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    margin: 0;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.emp-location, .emp-age {
+    font-size: 0.71rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.api-source-list {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+@media (max-width: 960px) {
+    .market-grid,
+    .fx-grid,
+    .industry-select-form .grid.four,
+    .api-source-list {
+        grid-template-columns: 1fr;
+    }
+    .fx-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+

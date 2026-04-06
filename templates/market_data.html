@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="panel analysis-hero">
+    <p class="chip">Live External Data</p>
+    <h1>Market Context</h1>
+    <p class="lead">
+        Real-time labour-market economics, city talent quality-of-life scores, and live currency
+        exchange rates — sourced from three free public APIs with no API key required.
+    </p>
+    <div class="api-sources-bar">
+        <span class="api-badge">World Bank Open Data</span>
+        <span class="api-badge">Teleport Urban Areas</span>
+        <span class="api-badge">Frankfurter Exchange Rates</span>
+        <span class="api-badge">RandomUser API</span>
+    </div>
+</section>
+
+<!-- Industry selector -->
+<section class="panel">
+    <h2>Select Industry</h2>
+    <form method="get" class="industry-select-form">
+        <div class="grid four">
+            {% for ind in industry_options %}
+            <label class="industry-radio-label{% if ind == selected_industry %} is-selected{% endif %}">
+                <input type="radio" name="industry" value="{{ ind }}"
+                    {% if ind == selected_industry %}checked{% endif %}
+                    onchange="this.form.submit()">
+                {{ ind|title }}
+            </label>
+            {% endfor %}
+        </div>
+    </form>
+    <p class="field-hint">
+        Showing context for <strong>{{ selected_industry|title }}</strong> —
+        benchmark country: <strong>{{ industry_country_map.get(selected_industry, 'US') }}</strong>
+    </p>
+</section>
+
+<div class="grid two market-grid">
+
+    <!-- ── World Bank Economic Indicators ── -->
+    <section class="panel market-panel">
+        <p class="chip">
+            <a href="{{ world_bank.world_bank.indicators.gdp_growth.source_url }}"
+               target="_blank" rel="noopener noreferrer">{{ world_bank.world_bank.indicators.gdp_growth.source }}</a>
+        </p>
+        <h2>Economic Indicators</h2>
+        <p class="lead">Country: <strong>{{ world_bank.country }}</strong></p>
+
+        {% for key, indicator in world_bank.indicators.items() %}
+        {% if not indicator.get('error') and indicator.values %}
+        <div class="indicator-block">
+            <p class="mini-label">{{ indicator.label }}</p>
+            <p class="indicator-desc">{{ indicator.description }}</p>
+            <div class="indicator-values">
+                {% for entry in indicator.values[:3] %}
+                <span class="indicator-pill">
+                    <span class="pill-year">{{ entry.year }}</span>
+                    <span class="pill-val">{{ entry.value }}</span>
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% elif indicator.get('error') %}
+        <p class="field-hint api-error">{{ indicator.label }}: {{ indicator.error }}</p>
+        {% else %}
+        <p class="field-hint">{{ indicator.label }}: No recent data available.</p>
+        {% endif %}
+        {% endfor %}
+    </section>
+
+    <!-- ── Teleport City Quality of Life ── -->
+    <section class="panel market-panel">
+        <p class="chip">
+            {% if not teleport.get('error') %}
+            <a href="{{ teleport.source_url }}" target="_blank" rel="noopener noreferrer">{{ teleport.source }}</a>
+            {% else %}
+            Teleport API
+            {% endif %}
+        </p>
+        <h2>Talent Market Quality</h2>
+        {% if teleport.get('error') %}
+        <p class="field-hint api-error">{{ teleport.error }}</p>
+        {% else %}
+        <p class="lead">City: <strong>{{ teleport.urban_area }}</strong></p>
+        <p class="teleport-total-score">
+            Overall Score <span class="score-number">{{ teleport.teleport_score }}</span> / 100
+        </p>
+        <div class="teleport-score-grid">
+            {% for item in teleport.scores %}
+            <div class="teleport-score-row">
+                <span class="ts-label">{{ item.name }}</span>
+                <span class="ts-bar-wrap">
+                    {%- set bar_w = (item.score * 10) if (item.score * 10) <= 100 else 100 -%}
+                    {%- set bar_style = "width:" ~ bar_w|int ~ "%;background:" ~ item.color -%}
+                    <span class="ts-bar" style="{{ bar_style }}"></span>
+                </span>
+                <span class="ts-val">{{ item.score }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </section>
+
+</div>
+
+<!-- ── Exchange Rates ── -->
+<section class="panel">
+    <p class="chip">
+        {% if not fx_rates.get('error') %}
+        <a href="{{ fx_rates.source_url }}" target="_blank" rel="noopener noreferrer">{{ fx_rates.source }}</a>
+        {% else %}
+        Frankfurter API
+        {% endif %}
+    </p>
+    <h2>Live Exchange Rates</h2>
+
+    {% if fx_rates.get('error') %}
+    <p class="field-hint api-error">Exchange rate data unavailable: {{ fx_rates.error }}</p>
+    {% else %}
+    <p class="field-hint">Base currency: <strong>{{ fx_rates.base }}</strong> — as of <strong>{{ fx_rates.date }}</strong></p>
+    <div class="grid four fx-grid">
+        {% for currency, rate in fx_rates.rates.items() %}
+        <div class="card fx-card">
+            <p class="fx-currency">{{ currency }}</p>
+            <p class="fx-rate">{{ rate }}</p>
+            <p class="fx-label">per 1 {{ fx_rates.base }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+
+<!-- ── Demo Employee Profiles ── -->
+<section class="panel">
+    <p class="chip">
+        <a href="{{ demo_employees.source_url }}" target="_blank" rel="noopener noreferrer">
+            {{ demo_employees.source }}
+        </a>
+    </p>
+    <h2>Live Demo Employee Profiles</h2>
+    <p class="field-hint">
+        Realistic employee metadata generated on request via the RandomUser public API —
+        used to populate the Live (RandomUser) HR provider feeds.
+    </p>
+
+    {% if demo_employees.get('error') %}
+    <p class="field-hint api-error">{{ demo_employees.error }}</p>
+    {% elif demo_employees.employees %}
+    <div class="grid three employee-grid">
+        {% for emp in demo_employees.employees %}
+        <article class="card employee-card">
+            {% if emp.thumbnail %}
+            <img src="{{ emp.thumbnail }}" alt="{{ emp.full_name }}" class="emp-avatar" loading="lazy">
+            {% endif %}
+            <div class="emp-info">
+                <p class="emp-name">{{ emp.full_name }}</p>
+                <p class="emp-title">{{ emp.title }}</p>
+                <p class="emp-dept">{{ emp.department }}</p>
+                <p class="emp-location">{{ emp.city }}, {{ emp.country }}</p>
+                <p class="emp-age">Age {{ emp.age }}</p>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="field-hint">No profiles returned.</p>
+    {% endif %}
+</section>
+
+<!-- ── API Source Attribution ── -->
+<section class="panel">
+    <h2>API Sources</h2>
+    <p class="lead">All data on this page is sourced from free public APIs with no API key required.</p>
+    <div class="grid two api-source-list">
+        <article class="card">
+            <p class="mini-label">World Bank Open Data</p>
+            <p>Labour market, GDP growth and employment indicators by country. Used to provide macro-economic context for industry sector analysis.</p>
+            <a href="https://datahelpdesk.worldbank.org/knowledgebase/topics/125589" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Documentation</a>
+        </article>
+        <article class="card">
+            <p class="mini-label">Teleport Urban Areas API</p>
+            <p>Quality-of-life scores across 17 categories for major urban areas worldwide. Used as a talent market attractiveness and retention proxy.</p>
+            <a href="https://developers.teleport.org/api/" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Documentation</a>
+        </article>
+        <article class="card">
+            <p class="mini-label">Frankfurter Exchange Rates</p>
+            <p>Real-time and historical foreign exchange rates sourced from the European Central Bank. Used to normalise financial metrics for multi-national comparisons.</p>
+            <a href="https://www.frankfurter.app/docs" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Documentation</a>
+        </article>
+        <article class="card">
+            <p class="mini-label">RandomUser API</p>
+            <p>Generates realistic employee profiles (name, role, city, age) for demo HR provider feeds. Powers the Live Tech Startup and Live Finance Firm import providers.</p>
+            <a href="https://randomuser.me" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Documentation</a>
+        </article>
+    </div>
+</section>
+{% endblock %}

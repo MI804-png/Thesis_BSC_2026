@@ -27,6 +27,14 @@ from data_store import (
     list_recent_analyses,
     save_analysis,
 )
+from external_apis import (
+    INDUSTRY_COUNTRY_MAP,
+    get_demo_employee_profiles,
+    get_exchange_rates,
+    get_market_context,
+    get_teleport_city_scores,
+    get_world_bank_country_profile,
+)
 from hr_integrations import AVAILABLE_PROVIDERS, fetch_provider_profile
 from ml_engine import get_ml_prediction, get_model_summary
 from reporting import build_analysis_pdf
@@ -554,6 +562,35 @@ def dashboard(role: str):
         role=role_data,
         role_key=role,
         latest_analysis=latest_analysis[0] if latest_analysis else None,
+    )
+
+
+@app.route("/market-context")
+@login_required
+def market_context():
+    """
+    Market Context page — pulls live data from three free public APIs:
+      • World Bank Open Data  (economic indicators per industry/country)
+      • Teleport              (city quality-of-life scores for talent benchmarking)
+      • Frankfurter           (real-time exchange rates for financial normalisation)
+    Data is fetched on demand; errors are handled gracefully and shown inline.
+    """
+    selected_industry = request.args.get("industry", "technology")
+    if selected_industry not in INDUSTRY_OPTIONS:
+        selected_industry = "technology"
+
+    context_data = get_market_context(industry=selected_industry)
+    demo_employees = get_demo_employee_profiles(count=6)
+
+    return render_template(
+        "market_data.html",
+        industry_options=INDUSTRY_OPTIONS,
+        selected_industry=selected_industry,
+        world_bank=context_data["world_bank"],
+        teleport=context_data["teleport"],
+        fx_rates=context_data["fx_rates"],
+        demo_employees=demo_employees,
+        industry_country_map=INDUSTRY_COUNTRY_MAP,
     )
 
 
