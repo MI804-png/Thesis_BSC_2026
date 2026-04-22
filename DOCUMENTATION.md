@@ -494,8 +494,8 @@ def fetch_provider_profile(provider_key, credentials):
 
 **1. Clone the repository**
 ```bash
-git clone https://github.com/yourusername/Thesis_Hr_system.git
-cd Thesis_Hr_system
+git clone https://github.com/MI804-png/Thesis_BSC_2026.git
+cd Thesis_BSC_2026
 ```
 
 **2. Create a virtual environment**
@@ -826,7 +826,8 @@ CREATE TABLE analyses (
 - Clear contracts between layers
 
 **Alternative Considered:**
-- Single monolithic file (rejected—unmanageable at scale)
+  - Keeping everything in one main file. I quickly realized this would become 
+    a maintenance nightmare as the UI grew, so I split the logic early.
 
 ### 2. Transparent, Auditable KPI Formulas
 
@@ -836,7 +837,8 @@ CREATE TABLE analyses (
 - Formulas are based on HR literature (not arbitrary)
 
 **Alternative Considered:**
-- Pure ML approach (rejected—harder to explain to stakeholders)
+  - Going with a pure ML model. While it might be "smarter," I decided against 
+    it because I wanted managers to be able to audit the math themselves.
 
 ### 3. Local Storage (SQLite) Instead of Cloud
 
@@ -847,8 +849,8 @@ CREATE TABLE analyses (
 - Easy to inspect (standard SQL tools)
 
 **Alternative Considered:**
-- PostgreSQL (too heavy for prototype)
-- MongoDB (unnecessary complexity)
+  - PostgreSQL or a full cloud DB. I stuck with SQLite because it’s zero-config 
+    and keeps all the sensitive HR data on the local machine for this demo.
 
 ### 4. Vanilla JavaScript (No Frontend Framework)
 

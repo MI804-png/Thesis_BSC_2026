@@ -1,0 +1,115 @@
+HR INSIGHT LAB - BRIEF PROJECT REQUIREMENTS CHECK
+
+Use this file as a quick acceptance checklist to verify that the whole project works and that the main thesis requirements are covered.
+
+1. ENVIRONMENT AND STARTUP
+- Virtual environment exists and activates successfully.
+- Dependencies install from requirements.txt without errors.
+- App starts with: python app.py
+- Local site opens at http://127.0.0.1:5000
+- No import-time crash from Flask, scikit-learn, ReportLab, requests, or SQLite.
+
+2. AUTHENTICATION AND ACCESS CONTROL
+- Login page loads correctly.
+- Demo users can sign in: admin, ceo, hr, finance, operations.
+- Invalid login shows an error.
+- Protected pages redirect unauthenticated users to login.
+- Role dashboards enforce access rules.
+- Admin can access all dashboards and all saved history.
+- Non-admin users only see their own saved analyses.
+
+3. CORE ANALYSIS WORKFLOW
+- Analysis page loads after login.
+- User can enter company profile fields manually.
+- Numeric inputs are accepted and clamped to valid ranges.
+- Analysis produces these outputs:
+  Leadership Readiness Score
+  Scaling Risk Score
+  Financial Stability Composite
+  Organizational Health Index
+- Rule-based prediction shows probability, verdict, horizon, and summary.
+- Recommendations appear after analysis.
+- Analysis is saved to SQLite after submission.
+
+4. MACHINE LEARNING LAYER
+- ML summary appears on the analysis page.
+- ML prediction runs after analysis.
+- Top contributing drivers are shown.
+- ML output does not replace the rule-based output; both are visible.
+
+5. DATA PERSISTENCE AND HISTORY
+- SQLite database file is created locally as hr_analysis.db.
+- Users table is seeded automatically on first run.
+- Analyses table stores manual and CSV-uploaded runs.
+- History page lists recent analyses.
+- Trend tracking appears when the same company has multiple saved runs.
+- PDF export works for saved analyses.
+
+6. CSV BULK ANALYSIS
+- CSV upload form accepts a .csv file.
+- Expected headers are:
+  company_name, industry, stage, employee_count, leadership_years, digital_score,
+  retention_pct, churn_pct, dte_ratio, doc_score, dep_score, margin_pct,
+  growth_pct, cash_months
+- Each row is processed and saved as a separate analysis.
+- Invalid, missing, or out-of-range fields produce validation notes.
+- Batch ranking is shown after upload.
+- PDF links work for batch rows.
+
+7. HRIS / PROVIDER IMPORTS
+- Provider import control appears on the analysis page.
+- BambooHR demo import loads sample data.
+- Workday demo import loads sample data.
+- RandomUser-based providers load realistic demo profiles when network access is available.
+- Imported data pre-fills the analysis form correctly.
+
+8. ROLE DASHBOARDS
+- CEO dashboard shows strategic KPI view.
+- HR dashboard shows people and leadership view.
+- Finance dashboard shows asset, debt, and cash flow view.
+- Operations dashboard shows process fragility and scaling view.
+- Dashboard KPI buttons update the detail panel correctly.
+
+9. MARKET CONTEXT / EXTERNAL DATA
+- Market Context page loads from /market-context.
+- Industry selector changes the displayed market context.
+- World Bank data is requested and displayed when available.
+- Teleport city quality-of-life data is displayed when available.
+- Frankfurter exchange-rate data is displayed when available.
+- API failures are handled gracefully with inline error messages.
+
+10. REPORTING AND DOCUMENTATION
+- PDF report includes company details, KPI scores, inputs, verdict, recommendations, and ML section.
+- README.md reflects the main working features.
+- DOCUMENTATION.md reflects the current route names and feature set.
+- THESIS.md matches the implemented architecture and KPI logic.
+- generate_documentation.py still runs if thesis PDF generation is required.
+
+11. UI AND TEMPLATE COVERAGE
+- These templates render without error:
+  home.html
+  login.html
+  analysis.html
+  history.html
+  dashboard.html
+  market_data.html
+  section.html
+- Navigation links work across the main pages.
+- Flash messages display correctly.
+- Static CSS and JS load correctly.
+
+12. FINAL SIGN-OFF
+Project can be considered functionally complete for the thesis prototype if all items below are true:
+- Login works.
+- Manual analysis works.
+- ML scoring works.
+- History works.
+- CSV upload works.
+- PDF export works.
+- Role dashboards work.
+- Market context page works.
+- Database persistence works.
+- Documentation matches the actual implementation.
+
+Known point to double-check:
+- Some older documentation may refer to outdated details. Compare the live code first when preparing the final thesis submission.

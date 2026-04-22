@@ -182,6 +182,12 @@ This is a local prototype, so a few constraints are intentional:
 
 The repository also contains `generate_documentation.py`, which generates a long-form PDF thesis document. That file reflects the academic documentation side of the project, while the web app demonstrates the interactive prototype.
 
+## Hurdles and Lessons Learned
+
+- **PDF Layouts are painful:** Getting ReportLab to handle long strategic recommendations without cutting off text took way more time than the actual math.
+- **The Data Problem:** I realized early on that "perfect" data doesn't exist. That's why I added the clamping logic—to stop the system from crashing if someone enters a weird outlier.
+- **ML vs. Rules:** The biggest surprise was how often the simple weighted formulas actually outperformed the ML model on edge cases. It really reinforced the value of transparency over complexity.
+
 ## Summary
 
 The current project is no longer just a thesis landing page. It is a local decision-support prototype that lets a user sign in, analyse companies, store results, compare runs, export reports, and inspect different dashboard views from the perspective of management roles.

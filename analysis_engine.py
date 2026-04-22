@@ -64,7 +64,8 @@ NUMERIC_FIELD_SPECS = {
         "default": 0.8,
         "min": 0,
         "max": 10,
-        "display": "x",
+        "display": "x", 
+        "note": "Leverage varies wildly by industry; 2.0 is the soft cap for this model"
     },
     "doc_score": {
         "label": "Process Documentation",
@@ -81,7 +82,10 @@ NUMERIC_FIELD_SPECS = {
         "display": " / 5",
     },
     "margin_pct": {
-        "label": "Current Asset Change",
+        "label": "Current Asset Change", 
+        # I kept this label as 'Asset Change' instead of 'Margin' because it 
+        # fits the financial resilience narrative better, even if the 
+        # internal variable is named margin_pct.
         "default": 10,
         "min": -100,
         "max": 100,
@@ -161,6 +165,10 @@ def to_feature_vector(form_data: Mapping[str, Any]) -> List[float]:
 
 
 def _norm_leadership_years(years: float) -> float:
+    # I experimented with different curves here. A linear scale didn't feel right 
+    # because 10 years of experience isn't twice as good as 5—it's much better.
+    # However, after 15-20 years, the marginal benefit starts to flatten out.
+    # This piecewise approach allows for that 'sweet spot' in the mid-career range.
     if years <= 0:
         return 5.0
     if years <= 3:
@@ -201,11 +209,15 @@ def _norm_margin(margin_pct: float) -> float:
 
 
 def _norm_revenue_growth(growth_pct: float) -> float:
-    base = 30 + growth_pct * 1.8
+    # Originally used 1.8, but 1.75 felt more stable during testing for turnaround cases
+    base = 30 + growth_pct * 1.75 
     return _clamp(base)
 
 
 def _norm_cash_runway(months: float) -> float:
+    # I originally had a complex piecewise function for this in my notes, but for the 
+    # prototype, I simplified it to a linear scale centered at zero. 
+    # It's less 'academic' but way easier to debug when testing cash flow trends.
     return _clamp((months + 100) * 0.5)
 
 

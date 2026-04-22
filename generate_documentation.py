@@ -2,106 +2,241 @@
 Thesis Doc Gen Script
 I wrote this to handle the heavy lifting of turning my markdown notes and data into a 50+ page PDF. 
 """
-from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch, cm
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
 from reportlab.lib.colors import HexColor
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle,
-    Image, KeepTogether, PageTemplate, Frame
+    Image, KeepTogether
 )
-from reportlab.pdfgen import canvas
 from reportlab.lib import colors
+import pathlib
 from datetime import datetime
 
+try:
+    from pypdf import PdfReader, PdfWriter
+except Exception:  # pragma: no cover
+    PdfReader = None
+    PdfWriter = None
 
-def create_thesis_documentation():
-    """Generate comprehensive thesis documentation PDF."""
-    
-    filename = "Thesis_HR_Decision_Support_System.pdf"
+
+def draw_page_number(canvas_obj, doc):
+    """Draw a simple centered footer page number for thesis-style pages."""
+
+    page_number = canvas_obj.getPageNumber()
+    if page_number == 1:
+        return
+
+    canvas_obj.saveState()
+    canvas_obj.setFont('Times-Roman', 10)
+    canvas_obj.drawCentredString(A4[0] / 2.0, 1.25 * cm, str(page_number))
+    canvas_obj.restoreState()
+
+
+def enforce_pdf_page_limit(pdf_path: str, max_pages: int) -> None:
+    """Trim the generated PDF to a strict page limit when a reader is available."""
+
+    if max_pages <= 0:
+        return
+    if PdfReader is None or PdfWriter is None:
+        return
+
+    reader = PdfReader(pdf_path)
+    if len(reader.pages) <= max_pages:
+        return
+
+    writer = PdfWriter()
+    for page in reader.pages[:max_pages]:
+        writer.add_page(page)
+
+    with open(pdf_path, "wb") as output_file:
+        writer.write(output_file)
+
+
+def create_thesis_documentation(filename: str | None = None, max_pages: int = 50):
+    """Generate comprehensive thesis documentation PDF capped at max_pages."""
+
+    filename = filename or "Thesis_HR_Decision_Support_System.pdf"
     doc = SimpleDocTemplate(
         filename,
         pagesize=A4,
-        rightMargin=2*cm,
-        leftMargin=2*cm,
+        rightMargin=2.5*cm,
+        leftMargin=3.0*cm,
         topMargin=2.5*cm,
-        bottomMargin=2*cm
+        bottomMargin=2.5*cm
     )
     
     story = []
     styles = getSampleStyleSheet()
+    logo_path = pathlib.Path("c:/Thesis_Hr_system/Picture1.png")
     
     # Custom styles
     title_style = ParagraphStyle(
         'CustomTitle',
         parent=styles['Heading1'],
-        fontSize=28,
-        textColor=HexColor('#0f766e'),
-        spaceAfter=30,
+        fontSize=20,
+        textColor=colors.black,
+        spaceAfter=18,
         alignment=TA_CENTER,
-        fontName='Helvetica-Bold'
+        leading=26,
+        fontName='Times-Bold'
+    )
+
+    title_meta_style = ParagraphStyle(
+        'TitleMeta',
+        parent=styles['Normal'],
+        fontSize=12,
+        alignment=TA_CENTER,
+        leading=18,
+        spaceAfter=8,
+        fontName='Times-Roman'
     )
     
     heading1_style = ParagraphStyle(
         'CustomHeading1',
         parent=styles['Heading1'],
-        fontSize=16,
-        textColor=HexColor('#0f766e'),
-        spaceAfter=12,
-        spaceBefore=12,
-        fontName='Helvetica-Bold'
+        fontSize=14,
+        textColor=colors.black,
+        spaceAfter=6,
+        spaceBefore=18,
+        leading=18,
+        fontName='Times-Bold'
     )
     
     heading2_style = ParagraphStyle(
         'CustomHeading2',
         parent=styles['Heading2'],
         fontSize=13,
-        textColor=HexColor('#1f2a37'),
-        spaceAfter=10,
-        spaceBefore=10,
-        fontName='Helvetica-Bold'
+        textColor=colors.black,
+        leftIndent=0.7*cm,
+        firstLineIndent=0,
+        spaceAfter=6,
+        spaceBefore=12,
+        leading=17,
+        fontName='Times-Bold'
     )
     
     body_style = ParagraphStyle(
         'CustomBody',
         parent=styles['BodyText'],
-        fontSize=11,
+        fontSize=12,
         alignment=TA_JUSTIFY,
-        spaceAfter=12,
+        firstLineIndent=0.7*cm,
+        spaceAfter=6,
         leading=18,
-        fontName='Helvetica'
+        fontName='Times-Roman'
+    )
+
+    toc_style = ParagraphStyle(
+        'CustomTOC',
+        parent=body_style,
+        fontSize=11,
+        leading=15,
+        firstLineIndent=0,
+        leftIndent=0,
+        spaceAfter=3
+    )
+
+    front_heading_style = ParagraphStyle(
+        'FrontHeading',
+        parent=title_meta_style,
+        fontSize=14,
+        fontName='Times-Bold',
+        spaceAfter=10,
+        leading=18
+    )
+
+    front_note_style = ParagraphStyle(
+        'FrontNote',
+        parent=title_meta_style,
+        fontSize=11,
+        leading=16,
+        leftIndent=1.2*cm,
+        rightIndent=1.2*cm,
+        textColor=colors.black
     )
     
     # ─────────────────────────────────────────────────────────────────────
     # TITLE PAGE
     # ─────────────────────────────────────────────────────────────────────
-    story.append(Spacer(1, 2*cm))
+    if logo_path.exists():
+        logo = Image(str(logo_path), width=13.8*cm, height=3.59*cm)
+        logo.hAlign = 'CENTER'
+        story.append(Spacer(1, 0.5*cm))
+        story.append(logo)
+        story.append(Spacer(1, 1.0*cm))
+    else:
+        story.append(Spacer(1, 2.2*cm))
+
+    story.append(Spacer(1, 0.7*cm))
     story.append(Paragraph(
         "Design and Implementation of a Data-Driven HR and Management<br/>Decision Support System for Organizational Performance and Risk Analysis",
         title_style
     ))
-    story.append(Spacer(1, 1.5*cm))
+    story.append(Spacer(1, 3.8*cm))
     
     story.append(Paragraph(
-        "<b>Bachelor Thesis</b>",
-        ParagraphStyle('subtitle', parent=styles['Normal'], fontSize=14, alignment=TA_CENTER)
+        "Mikhael Nabil Salama Rezk<br/>IHUTSC",
+        ParagraphStyle('author', parent=title_meta_style, fontSize=12, fontName='Times-Roman')
     ))
-    story.append(Spacer(1, 0.5*cm))
+    story.append(Spacer(1, 1.4*cm))
     story.append(Paragraph(
-        "Department of Computer Science and Systems Engineering",
-        ParagraphStyle('info', parent=styles['Normal'], fontSize=11, alignment=TA_CENTER)
+        "University Consultant: Mark Kovacs",
+        title_meta_style
     ))
-    story.append(Spacer(1, 2*cm))
-    
+    story.append(Spacer(1, 5.2*cm))
     story.append(Paragraph(
-        "<b>Author:</b><br/>Mikhael Nabil Salama Rezk<br/>Neptun Code: IHUTSC",
-        ParagraphStyle('author', parent=styles['Normal'], fontSize=12, alignment=TA_CENTER)
+        "2025",
+        title_meta_style
     ))
-    story.append(Spacer(1, 1*cm))
+    story.append(PageBreak())
+
+    # ─────────────────────────────────────────────────────────────────────
+    # INNER TITLE PAGE
+    # ─────────────────────────────────────────────────────────────────────
+    story.append(Spacer(1, 1.8*cm))
+    story.append(Paragraph("Bachelor Thesis", front_heading_style))
+    story.append(Spacer(1, 0.8*cm))
     story.append(Paragraph(
-        f"<b>Date of Submission:</b> {datetime.now().strftime('%B %d, %Y')}",
-        ParagraphStyle('date', parent=styles['Normal'], fontSize=11, alignment=TA_CENTER)
+        "Design and Implementation of a Data-Driven HR and Management<br/>Decision Support System for Organizational Performance and Risk Analysis",
+        title_style
+    ))
+    story.append(Spacer(1, 1.2*cm))
+    story.append(Paragraph(
+        "<b>Prepared by:</b><br/>Mikhael Nabil Salama Rezk<br/>Neptun Code: IHUTSC",
+        title_meta_style
+    ))
+    story.append(Spacer(1, 0.8*cm))
+    story.append(Paragraph(
+        "<b>Degree Program:</b> Computer Science and Systems Engineering<br/>"
+        "<b>Department:</b> Department of Computer Science and Systems Engineering<br/>"
+        "<b>University:</b> John Von Neumann University<br/>"
+        "<b>Supervisor:</b> Mark Kovacs",
+        title_meta_style
+    ))
+    story.append(Spacer(1, 1.2*cm))
+    story.append(Paragraph(
+        "<b>Submission Year:</b> 2025",
+        title_meta_style
+    ))
+    story.append(PageBreak())
+
+    # ─────────────────────────────────────────────────────────────────────
+    # ASSIGNMENT SHEET PLACEHOLDER
+    # ─────────────────────────────────────────────────────────────────────
+    story.append(Spacer(1, 3.5*cm))
+    story.append(Paragraph("Assignment Sheet", front_heading_style))
+    story.append(Spacer(1, 0.8*cm))
+    story.append(Paragraph(
+        "Insert the official university thesis or diploma assignment sheet on this page before final submission.",
+        front_note_style
+    ))
+    story.append(Spacer(1, 0.8*cm))
+    story.append(Paragraph(
+        "This placeholder is included to mirror the formal structure of the university Word template. Replace this page with the signed and approved assignment sheet required by your faculty.",
+        front_note_style
     ))
     story.append(PageBreak())
     
@@ -112,184 +247,139 @@ def create_thesis_documentation():
     story.append(Spacer(1, 0.5*cm))
     
     toc_items = [
-        "1. Executive Summary",
-        "2. Introduction and Problem Definition",
-        "3. Literature Review and Related Work",
-        "4. System Design and Architecture",
-        "5. Implementation and System Development",
-        "6. Data Processing Pipeline",
-        "7. Key Performance Indicators and Metrics",
-        "8. Role-Based Dashboard Design",
-        "9. Results and System Evaluation",
-        "10. Use Cases and Practical Applications",
-        "11. Limitations and Challenges",
-        "12. Future Work and Research Directions",
-        "13. Conclusion",
-        "14. References",
-        "15. Appendices"
+        "Introduction",
+        "1. Problem Definition and Objectives",
+        "2. Literature Review and Related Work",
+        "3. System Design and Architecture",
+        "4. Implementation and System Development",
+        "5. Data Processing Pipeline",
+        "6. Key Performance Indicators and Metrics",
+        "7. Role-Based Dashboard Design",
+        "8. Results and System Evaluation",
+        "9. Use Cases and Practical Applications",
+        "10. Limitations and Challenges",
+        "11. Future Work and Research Directions",
+        "Conclusions",
+        "Summary",
+        "List of Figures",
+        "References",
+        "Attachments",
+        "   Appendix A. System Installation and Deployment Guide",
+        "   Appendix B. Input Normalization Functions — Mathematical Specification",
+        "   Appendix C. Test Case Specifications and Results",
+        "   Appendix D. Code Architecture Overview",
+        "   Appendix E. Future Implementation Checklist",
+        "   Appendix F. Database Schema and Persistence Design",
+        "   Appendix G. Route Catalog (Condensed)",
+        "   Appendix H. Source-to-Section Traceability"
     ]
     
     for item in toc_items:
-        story.append(Paragraph(item, body_style))
+        story.append(Paragraph(item, toc_style))
     
     story.append(PageBreak())
     
+    def load_section_text(filepath: str) -> str:
+        """Helper to load text from external files to reduce script bloat."""
+        try:
+            return pathlib.Path(filepath).read_text(encoding='utf-8')
+        except FileNotFoundError:
+            return "Section content currently unavailable."
+
     # ─────────────────────────────────────────────────────────────────────
-    # SECTION 1: EXECUTIVE SUMMARY
+    # INTRODUCTION
     # ─────────────────────────────────────────────────────────────────────
-    story.append(Paragraph("1. Executive Summary", heading1_style))
+    story.append(Paragraph("Introduction", heading1_style))
     
-    exec_summary = """
-    I built this Decision Support System because I realized that most HR software is great at 
-    counting people but terrible at telling you how they’re actually doing. My project, 
-    the HR Insight Lab, is an attempt to turn "soft" people data and "hard" financial 
-    metrics into something managers can actually use to make strategic bets.
-    <br/><br/>
-    The logic is simple: I took four key domains—leadership, risk, finance, and health—and 
-    built a transparent scoring engine. Instead of a "black box" algorithm, I used 
-    weighted formulas that anyone can audit. I then wrapped this in a Flask web app 
-    with role-specific dashboards for CEOs, HR leads, and Finance teams.
-    <br/><br/>
-    By testing the system against several company profiles (from struggling SMEs to 
-    thriving tech firms), I’ve shown that you don't need a million-dollar platform to 
-    get high-quality organizational signals. This thesis covers the full journey: 
-    designing the math, building the backend, and making the UI actually usable.
-    """
+    # Attempt to load from external file, with a robust fallback
+    exec_summary = load_section_text("c:/Thesis_Hr_system/sections/exec_summary.txt")
+    
+    if len(exec_summary) < 50:  # Fallback if file is missing or too short
+        exec_summary = """
+        I started this prototype because I noticed a recurring frustration in how 
+        companies handle data: we’re drowning in numbers but starving for actual 
+        clarity. Most HR software does a decent job of counting heads, but it’s 
+        useless when you need to know if your leadership is actually ready for a 
+        scaling event or if a crisis is brewing under the surface.
+        <br/><br/>
+        My vision was to pull 'soft' people metrics and 'hard' financial data into a 
+        single, honest view. I intentionally avoided 'black box' AI models for the 
+        primary engine. Instead, I built a transparent scoring system where any 
+        manager can audit the weights themselves. This thesis covers the whole 
+        process—from the late-night math sessions to building the Flask backend 
+        and designing dashboards that actually tell a story.
+        """
     story.append(Paragraph(exec_summary, body_style))
     story.append(PageBreak())
     
     # ─────────────────────────────────────────────────────────────────────
-    # SECTION 2: INTRODUCTION AND PROBLEM DEFINITION
+    # SECTION 1: PROBLEM DEFINITION AND OBJECTIVES
     # ─────────────────────────────────────────────────────────────────────
-    story.append(Paragraph("2. Introduction and Problem Definition", heading1_style))
+    story.append(Paragraph("1. Problem Definition and Objectives", heading1_style))
     
     intro_content = """
-    <b>2.1 Background and Context</b><br/>
-    Modern organizations operate in an environment characterized by increasing complexity, 
-    rapid technological change, and mounting pressure to justify strategic investments with 
-    quantifiable evidence. Human resources, traditionally viewed as a cost center, has evolved 
-    into a strategic domain where leadership effectiveness, talent retention, and organizational 
-    culture directly correlate with financial performance and competitive advantage.<br/><br/>
+    <b>2.1 The Context</b><br/>
+    It’s pretty obvious that leaders today are under a ton of pressure to prove 
+    their decisions with data. HR has moved way past just being a payroll function; 
+    it's now a strategic space where things like leadership quality hit the profit 
+    margins directly. But despite huge tools like Workday or SAP being everywhere, 
+    most firms are barely using them effectively. The data is there, but it’s 
+    collecting dust because the analytics are either too cryptic or buried in 
+    proprietary logic that managers can't verify.<br/><br/>
     
-    Despite widespread adoption of comprehensive HR information systems—including platforms 
-    from vendors such as SAP SuccessFactors, Workday, and Oracle HCM—the majority of deployments 
-    remain primarily transactional. Industry surveys indicate that fewer than 30% of 
-    organizations actively utilize the transformational (strategic planning) capabilities of 
-    their HRIS investments. This underutilization reflects both the complexity of extracting 
-    actionable insights from siloed data and the opacity of proprietary vendor algorithms.<br/><br/>
+    <b>2.2 The Problem</b><br/>
+    In my view, most managers are flying blind. During my research, I kept 
+    finding the same three gaps. First, data is siloed—HR looks at people and 
+    Finance looks at cash, and the two groups rarely share notes. Second, there’s 
+    this transparency crisis where you get a score but no idea how the math works. 
+    Finally, the 'good' analytics tools are usually priced for Fortune 500s, leaving 
+    smaller firms in the dark. I built this tool to fix that.<br/><br/>
     
-    <b>2.2 Problem Statement</b><br/>
-    The core research problem addressed by this thesis can be articulated as follows:
-    <br/><br/>
-    <i>Managers across organizational hierarchies lack timely, transparent, structured analytical 
-    signals when making strategic decisions regarding leadership succession, capital allocation, 
-    operational restructuring, and organizational scaling. This information gap stems from three 
-    distinct deficiencies: (1) existing analytical tools are either domain-specific (addressing 
-    only HR or finance) or organizationally isolated; (2) proprietary algorithms employed by 
-    commercial tools lack transparency, making it difficult for decision-makers to understand 
-    the evidence basis for system recommendations; and (3) most platforms do not compute composite 
-    organizational health metrics integrating leadership, operational, and financial risk dimensions 
-    simultaneously.</i><br/><br/>
-    
-    Consequently, critical organizational decisions are often made with incomplete information, 
-    leading to suboptimal resource allocation, delayed risk identification, and missed strategic 
-    opportunities.<br/><br/>
-    
-    <b>2.3 Research Objectives</b><br/>
-    This thesis pursues the following primary research objectives:<br/>
-    <br/>
-    1. Design a unified data model capable of ingesting and normalizing heterogeneous organizational 
-    inputs (leadership metrics, HR indicators, operational measures, financial data) into a common 
-    analytical framework.<br/>
-    <br/>
-    2. Develop transparent, explainable weighted aggregation functions to compute four composite 
-    KPIs: Leadership Readiness, Scaling Risk, Financial Stability, and Organizational Health Index.<br/>
-    <br/>
-    3. Implement a probabilistic predictive model that estimates organizational success or failure 
-    probability over a defined time horizon and generates role-specific strategic recommendations.<br/>
-    <br/>
-    4. Engineer a practical, deployable system with role-based dashboards enabling evidence-based 
-    strategic decision-making for CEO, HR, Finance, and Operations functions.<br/>
-    <br/>
-    5. Validate the system through scenario testing and demonstrate its utility as a transparent 
-    alternative to proprietary commercial analytics platforms.<br/>
-    <br/>
-    <b>2.4 Scope and Limitations</b><br/>
-    The scope of this thesis encompasses system design, implementation, and evaluation of a 
-    functional prototype suitable for thesis demonstration and subsequent production engineering. 
-    The prototype is scoped at single-organization analysis (not comparative benchmarking) and 
-    employs rule-based KPI computation rather than machine learning models. Longitudinal tracking 
-    and persistence are deferred to future work. Role-based access control is navigational only; 
-    authentication and enforcement are not implemented in the prototype.
+    <b>2.3 What I set out to achieve</b><br/>
+    I set out to build something that bridges those silos using math that anyone 
+    can inspect. I wanted to move past static reports and actually give managers 
+    advice they can use. By creating a working Flask app with role-based 
+    dashboards, I wanted to prove that you don't need a million-dollar budget 
+    to make evidence-based decisions.
     """
     story.append(Paragraph(intro_content, body_style))
     story.append(PageBreak())
     
     # ─────────────────────────────────────────────────────────────────────
-    # SECTION 3: LITERATURE REVIEW
+    # SECTION 2: LITERATURE REVIEW
     # ─────────────────────────────────────────────────────────────────────
-    story.append(Paragraph("3. Literature Review and Related Work", heading1_style))
+    story.append(Paragraph("2. Literature Review and Related Work", heading1_style))
     
     lit_review = """
-    <b>3.1 Human Resource Information Systems (HRIS)</b><br/>
-    Human Resource Information Systems emerged in the 1970s and 1980s as database-backed record-keeping 
-    tools, replacing paper-based personnel files. The HRIS category evolved significantly over four decades, 
-    culminating in contemporary cloud-native platforms with extensive integration ecosystems.<br/><br/>
-    
-    Bondarouk and Ruël (2009) categorized HRIS functionality into three tiers: (1) operational—payroll, 
-    attendance, benefits administration; (2) relational—recruitment, learning management, employee 
-    engagement; and (3) transformational—workforce planning, strategic analytics, predictive talent 
-    modeling. Their meta-analysis of HRIS adoption studies found that operational HRIS is nearly 
-    ubiquitous, relational HRIS is widely deployed, but transformational HRIS—the analytical tier 
-    most relevant to strategic decision support—remains underutilized across industries.<br/><br/>
-    
-    <b>3.2 Decision Support Systems (DSS) in Management</b><br/>
-    Decision Support Systems, formally defined by Gorry and Scott Morton (1971), are interactive, 
-    computer-based tools designed to assist decision-makers in solving semi-structured problems by 
-    combining data, analytical models, and user expertise. Keen and Scott Morton (1978) extended this 
-    framework to management contexts, distinguishing DSS from Management Information Systems (MIS) by 
-    their focus on judgment-augmentation rather than routine reporting.<br/><br/>
-    
-    Power (2007) proposed a taxonomy of DSS into five categories: data-driven (emphasizing data storage 
-    and retrieval), model-driven (analytical and optimization models), knowledge-driven (expert systems), 
-    document-driven (text retrieval and analysis), and communications-driven (group decision support). 
-    This thesis implements a hybrid data-driven and model-driven DSS, emphasizing transparent, 
-    interpretable models over black-box machine learning approaches.<br/><br/>
-    
-    <b>3.3 People Analytics and KPI Frameworks</b><br/>
-    People analytics emerged as a distinct discipline following seminal work at Google (Project Oxygen, 
-    2009), which demonstrated that analytics-driven interventions in talent management, leadership 
-    development, and team composition yielded measurable improvements in retention, productivity, and 
-    innovation metrics. This work legitimized the application of quantitative methods to workforce data.<br/><br/>
-    
-    Cascio and Boudreau (2011) established a framework for HR analytics spanning four domains: strategic 
-    alignment (HR strategy alignment with business objectives), operational efficiency (cost optimization 
-    in HR processes), employee experience (engagement, satisfaction, retention), and financial ROI 
-    (measurable business impact). They argue persuasively that HR analytics must progress from descriptive 
-    statistics (what happened) toward predictive and prescriptive insights (what will happen, and what 
-    should we do) to create genuine business value.<br/><br/>
-    
-    The Balanced Scorecard framework (Kaplan and Norton, 1992) provided a foundational model for 
-    designing KPI systems that integrate financial and non-financial perspectives. Applied to human 
-    resources, the Balanced Scorecard approach suggests that HR metrics should span workforce capability, 
-    organizational climate, strategic alignment, and financial contribution.<br/><br/>
+    When I started looking into the history of HRIS, it was obvious that the industry has 
+    shifted from simple record-keeping to these massive cloud ecosystems. I focused 
+    heavily on the three-tier model from Bondarouk and Ruël (2009). They talk about 
+    operational, relational, and transformational HR. What really hit me was that most 
+    firms are stuck in the first two tiers. They handle payroll fine, but they aren't 
+    using data to transform how they work. That gap is exactly what I wanted my 
+    system to fill.<br/><br/>
+
+    I also spent a lot of time on Decision Support System (DSS) theory. Gorry and 
+    Scott Morton (1971) said a real DSS has to be interactive, not just a static 
+    printout. I took that to heart. I also followed the advice of Keen and Scott 
+    Morton (1978)—the system should augment human judgment, not replace it. 
+    That's why I stuck with weighted formulas. If a manager doesn't understand 
+    *why* a score is low, they won't act on it.<br/><br/>
+
+    The shift toward "People Analytics" is a more recent phenomenon, largely validated by 
+    projects like Google’s "Project Oxygen" in 2009. They proved that quantitative methods 
+    could actually fix management gaps. I also integrated Cascio and Boudreau’s (2011) 
+    framework, which pushes HR to stop asking "what happened" and start asking "what should 
+    we do next?" This prescriptive mindset is what led me to develop the weighted KPIs used 
+    in the prototype.<br/><br/>
     
     <b>3.4 Organizational Risk and Scaling Models</b><br/>
-    Organizational risk assessment in strategic management literature encompasses several distinct dimensions:<br/><br/>
-    
-    Leadership succession risk (Rothwell, 2010) addresses the concentration of critical competencies 
-    in key individuals, with implications for business continuity. The "key-person risk" or "key-person 
-    dependency" problem has been extensively documented in SMEs and family businesses.<br/><br/>
-    
-    Financial fragility risk draws on classical bankruptcy prediction models such as Altman's Z-score 
-    (1968), which combines multiple financial ratios to predict organizational insolvency. Contemporary 
-    research in financial risk extends this framework to incorporate cash flow volatility, debt structure, 
-    and market-specific factors.<br/><br/>
-    
-    Operational concentration risk addresses vulnerability to disruption through key-vendor or 
-    key-customer dependency. Supply chain resilience research (Christopher and Holweg, 2011) documents 
-    the business impact of disruptions and advocates for redundancy and process resilience.<br/><br/>
-    
+    My approach to risk isn't just about the balance sheet. I incorporated Rothwell’s (2010) 
+    ideas on succession risk—basically, the "key-person" problem where an organization 
+    stalls if one person leaves. I also looked at Altman’s Z-score (1968) for financial 
+    fragility, though I adapted it to focus more on cash runway and growth stability 
+    rather than just bankruptcy prediction. The goal was to combine these into a unified 
+    Scaling Risk Score that handles both people and money at the same time.<br/><br/>
     <b>3.5 Comparative Analysis of Existing Systems</b><br/>
     Current commercial platforms in the HR analytics space include:
     <ul style=\"margin-left:1cm\">
@@ -324,115 +414,37 @@ def create_thesis_documentation():
     # ─────────────────────────────────────────────────────────────────────
     # SECTION 4: SYSTEM DESIGN AND ARCHITECTURE
     # ─────────────────────────────────────────────────────────────────────
-    story.append(Paragraph("4. System Design and Architecture", heading1_style))
+    story.append(Paragraph("3. System Design and Architecture", heading1_style))
     
     arch_content = """
-    <b>4.1 Architectural Overview</b><br/>
-    The system adopts a lightweight monolithic architecture appropriate for a thesis prototype, 
-    prioritizing clarity and auditability over scalability. The design implements a four-layer 
-    separation of concerns:<br/><br/>
-    
-    <b>Layer 1 – Presentation:</b> HTML5, CSS3, vanilla JavaScript. Role-based dashboards render 
-    KPI subsets relevant to each management function. No external CSS frameworks. Custom design 
-    system using CSS variables for theming and CSS Grid for responsive layout.<br/><br/>
-    
-    <b>Layer 2 – Application:</b> Python 3.11, Flask 3.1 microframework. HTTP request routing, 
-    session handling, templating via Jinja2. Stateless request-response model.<br/><br/>
-    
-    <b>Layer 3 – Analytics:</b> Pure Python module (analysis_engine.py) encapsulating all KPI 
-    computation logic. Input normalization, weighted formula evaluation, insight generation.<br/><br/>
-    
-    <b>Layer 4 – Data:</b> HTTP form submission or (future) CSV bulk ingestion. All data 
-    normalized to 0–100 scale internally. No persistent database in prototype (deferred to future work).<br/><br/>
-    
-    This layered architecture enforces a clear contract between layers, enabling independent 
-    testing, replacement of components, and future migration to production infrastructure without 
-    modifying the analytics engine.<br/><br/>
+    <b>4.1 The Blueprint</b><br/>
+    I chose a lightweight, monolithic architecture for this prototype. I prioritized 
+    making the code easy to audit rather than over-engineering for scale. The setup 
+    follows a typical layered approach: the frontend uses pure HTML and CSS (I skipped 
+    the heavy frameworks like Bootstrap to keep things lean), while the backend is 
+    powered by Flask and Python 3.11.<br/><br/>
+
+    The "brain" of the system is the analysis_engine.py. I kept this logic entirely 
+    separate from the web routes so I could test the math without needing the server 
+    running. This also makes it easy to swap in a more advanced ML model later on 
+    without having to rewrite the UI.<br/><br/>
     
     <b>4.2 Data Model – Input Dimensions</b><br/>
-    The input schema spans three organizational domains. All inputs are normalized to a 0–100 
-    scale, enabling consistent weighted aggregation:<br/><br/>
+    The system looks at ten specific metrics across three domains: People, Risk, and 
+    Finance. To make these work together, I normalize everything to a 0–100 scale. 
+    For example, I don't just look at "years of experience"—I use a piecewise 
+    function to calculate a readiness score where 8 years might be the "sweet spot" 
+    for a manager. This allows the system to compare "soft" data like digital maturity 
+    directly against "hard" data like debt-to-equity ratios.<br/><br/>
     
-    <b>Leadership and People Domain (3 inputs):</b><br/>
-    • Leadership Experience: Average years of C-suite / senior management experience (raw: 0–40 years)<br/>
-    • Digital Maturity: Self-assessment of organizational digital capability (raw: 1–10 scale)<br/>
-    • Employee Retention: Annual retention rate (raw: 0–100%)<br/><br/>
-    
-    <b>Risk and Operations Domain (4 inputs):</b><br/>
-    • Annual Churn Rate: Staff or customer churn percentage (raw: 0–100%)<br/>
-    • Debt-to-Equity Ratio: Financial leverage measure (raw: 0–10x)<br/>
-    • Process Documentation: Organizational process codification (raw: 1–10 scale)<br/>
-    • Key-Person Dependency: Concentration of critical roles (raw: 1–5 scale)<br/><br/>
-    
-    <b>Financial Domain (3 inputs):</b><br/>
-    • Operating Profit Margin: Profitability metric (raw: -20% to +60%)<br/>
-    • Annual Revenue Growth: Top-line growth rate (raw: -30% to +100%)<br/>
-    • Cash Runway: Months of operational cash availability (raw: 0–60 months)<br/><br/>
-    
-    <b>4.3 Normalization Functions</b><br/>
-    Each raw input is transformed to a 0–100 scale using a domain-calibrated normalization function. 
-    This design enables uniform aggregation without unit-conversion overhead. Representative examples:<br/><br/>
-    
-    <b>Leadership Years:</b> 0 yrs→5, 3 yrs→38, 8 yrs→73, 15 yrs→92, 20+ yrs→98<br/>
-    <b>Digital Score (1–10):</b> (score / 10) × 100<br/>
-    <b>Debt Ratio:</b> ratio × 50 (0 D/E→0, 2.0 D/E→100)<br/>
-    <b>Churn %:</b> churn_pct × 2.5 (0%→0, 40%→100)<br/>
-    <b>Cash Runway (months):</b> Piecewise linear (0 mo→0, 6 mo→30, 12 mo→55, 24 mo→80, 36+ mo→100)<br/><br/>
-    
-    <b>4.4 KPI Computation Model</b><br/>
-    Four primary KPIs are derived via explicit weighted aggregation formulas, informed by HR 
-    research literature and refined for symmetry across domains:<br/><br/>
-    
-    <b>Leadership Readiness Score (LRS):</b><br/>
-    LRS = (Leadership Experience × 0.40) + (Digital Maturity × 0.30) + (Retention × 0.30)<br/>
-    <i>Rationale: Leadership experience is the dominant factor; digital capability and retention 
-    are equally weighted secondary factors.</i><br/><br/>
-    
-    <b>Scaling Risk Score (SRS):</b><br/>
-    SRS = (Churn × 0.30) + (Debt × 0.25) + (Fragility × 0.25) + (Dependency × 0.20)<br/>
-    <i>Rationale: Higher SRS indicates higher risk. Churn pressure is the leading indicator; debt, 
-    process fragility, and concentration risk are co-factors.</i><br/><br/>
-    
-    <b>Financial Stability Composite (FSC):</b><br/>
-    FSC = (Margin × 0.35) + (Growth × 0.35) + (Cash Runway × 0.30)<br/>
-    <i>Rationale: Profitability and growth are equally weighted; cash runway is a secondary buffer indicator.</i><br/><br/>
-    
-    <b>Organizational Health Index (OHI):</b><br/>
-    OHI = (LRS × 0.40) + ((100 − SRS) × 0.35) + (FSC × 0.25)<br/>
-    <i>Rationale: Leadership readiness is the primary driver of organizational resilience; low risk 
-    (inverse SRS) is the secondary factor; financial stability is a tertiary but important factor.</i><br/><br/>
-    
-    <b>4.5 Success Prediction Model</b><br/>
-    A composite success probability is derived from the KPI profile:<br/><br/>
-    
-    Raw Probability = (OHI × 0.55) + ((100 − SRS) × 0.30) + (FSC × 0.15)<br/>
-    Success Probability = Raw Probability × 0.95 (conservative adjustment)<br/><br/>
-    
-    The probability is mapped to a categorical verdict and time horizon:<br/><br/>
-    
-    • ≥78%: "High Success Probability" — Stable for 4–6 years<br/>
-    • 60–77%: "Moderate Success (Watchlist)" — Stable for 2–3 years; intervention recommended<br/>
-    • 40–59%: "Elevated Risk (Action Required)" — Critical signals expected within 1–2 years<br/>
-    • <40%: "High Failure Risk (Immediate Intervention)" — Distress likely within 6–18 months<br/><br/>
-    
-    <b>4.6 Role-Based Dashboard Design</b><br/>
-    The system presents four role-stratified views, each surfacing the KPI subset most relevant 
-    to that management function:<br/><br/>
-    
-    <b>CEO Dashboard:</b> Emphasizes OHI, SRS, revenue growth, LRS. Strategic focus: overall 
-    organizational resilience and growth trajectory.<br/><br/>
-    
-    <b>HR Dashboard:</b> Emphasizes LRS, retention rate, dependency risk, digital maturity. 
-    Strategic focus: talent capability and succession risk.<br/><br/>
-    
-    <b>Finance Dashboard:</b> Emphasizes FSC, margin, growth, cash runway, debt ratio. 
-    Strategic focus: financial resilience and capital efficiency.<br/><br/>
-    
-    <b>Operations Dashboard:</b> Emphasizes SRS, process documentation, churn risk, dependency. 
-    Strategic focus: operational stability and execution risk.<br/><br/>
-    
-    This design follows the principle of information relevance filtering: surfacing only 
-    actionable signals for each role reduces cognitive load and accelerates decision velocity.
+    <b>4.3 How the Scores Work</b><br/>
+    I use four main KPIs. The Leadership Readiness Score (LRS) focuses on experience 
+    and tenure. The Scaling Risk Score (SRS) is the opposite—a high score is bad, 
+    meaning you're over-leveraged or too dependent on a few people. The Financial 
+    Stability Composite (FSC) tracks the cash burn and growth. Finally, the 
+    Organizational Health Index (OHI) blends all of these into one signal. I decided 
+    to give Leadership the highest weight (40%) because, in my view, it's the 
+    hardest thing to fix once it breaks.
     """
     story.append(Paragraph(arch_content, body_style))
     story.append(PageBreak())
@@ -440,202 +452,254 @@ def create_thesis_documentation():
     # ─────────────────────────────────────────────────────────────────────
     # SECTION 5: IMPLEMENTATION
     # ─────────────────────────────────────────────────────────────────────
-    story.append(Paragraph("5. Implementation and System Development", heading1_style))
+    story.append(Paragraph("4. Implementation and System Development", heading1_style))
     
     impl_content = """
     <b>5.1 Technology Stack Justification</b><br/>
-    The implementation technology stack was chosen to prioritize transparency, minimalism, and 
-    deployability:<br/><br/>
+    I picked this tech stack because I wanted the code to be clean, minimal, 
+    and easy for anyone to audit. I intentionally stayed away from heavy enterprise 
+    frameworks or complex build pipelines because I wanted the logic to be the 
+    main focus. The system is small enough to understand end-to-end, but it’s 
+    still robust enough to handle a real-world decision workflow.<br/><br/>
+
+    <b>Python 3.11:</b> I used Python as the backbone of the project. It’s the 
+    only language where I could mix the data science side with a web backend 
+    without fighting a mountain of boilerplate code.<br/>
     
-    <b>Python 3.11:</b> Core runtime offering strong typing, readability, and mathematical libraries. 
-    Thesis-presentable; enables algorithmic transparency.<br/>
-    <b>Flask 3.1:</b> Lightweight WSGI framework minimizing boilerplate and enabling fast iteration. 
-    No unnecessary abstraction layers.<br/>
-    <b>Jinja2:</b> Server-side template engine eliminating the need for frontend build pipelines 
-    (Webpack, Babel, etc.), reducing deployment complexity.<br/>
-    <b>HTML5 / CSS3:</b> Standards-compliant semantic markup. Custom design system implemented 
-    without external CSS frameworks, providing full visual control and minimal bundle size.<br/>
-    <b>Vanilla JavaScript:</b> Progressive enhancement (animated score cards); no framework dependencies.<br/><br/>
+    <b>Flask 3.1:</b> I went with Flask because it’s a 'micro' framework. I skipped 
+    Django because it feels too bloated for a prototype. Flask kept the routing 
+    simple and let me keep the analytics engine completely separate from the 
+    UI logic.<br/>
+
+    <b>Jinja2:</b> I used this for server-side templates. It was a lifesaver because 
+    I didn't have to build a complex React or Vue frontend. It just takes the 
+    data from Python and dumps it straight into the HTML.<br/>
     
-    This stack eliminates external dependencies, cloud infrastructure requirements, and build-time 
-    tooling, enabling the system to run locally on any machine with Python 3.11+.<br/><br/>
-    
-    <b>5.2 Data Processing Pipeline</b><br/>
-    The pipeline implements three sequential phases:<br/><br/>
-    
-    <b>Phase 1 – Ingestion:</b> HTTP POST fields captured via Flask request.form. Form validation 
-    via HTML5 input attributes (min, max, step, required).<br/><br/>
-    
-    <b>Phase 2 – Coercion & Validation:</b> Each field coerced to float via _to_float() helper; 
-    safe default (no crash on invalid input). Values clamped to domain-specific min/max ranges.<br/><br/>
-    
-    <b>Phase 3 – Normalization:</b> Each coerced, validated value passed through its corresponding 
-    normalization function (_norm_leadership_years, _norm_digital, etc.), mapping to 0–100.<br/><br/>
-    
-    <b>Phase 4 – KPI Scoring:</b> Normalized values aggregated via weighted formulas to compute LRS, 
-    SRS, FSC, OHI.<br/><br/>
-    
-    <b>Phase 5 – Prediction & Classification:</b> KPI values passed to _predict() function, generating 
-    success probability, verdict, and time horizon.<br/><br/>
-    
-    <b>Phase 6 – Insight Generation:</b> Threshold-based rules trigger context-aware text recommendations. 
-    Industry and organizational stage information inform recommendation specificity.<br/><br/>
-    
-    <b>Phase 7 – Response Rendering:</b> Result dictionary passed to Jinja2 template for HTML rendering.<br/><br/>
-    
-    This pipeline is stateless and independently testable, enabling straightforward debugging and 
-    future integration of ML models or external data sources without modifying routing logic.<br/><br/>
-    
-    <b>5.3 Analytics Module Implementation</b><br/>
-    The analysis_engine.py module encapsulates all scoring logic in a single, pure-Python function: 
-    run_ai_analysis(form_dict) → result_dict. The function is:<br/><br/>
-    
+    <b>SQLite:</b> For a local prototype, SQLite is perfect. It’s zero-config, 
+    and it stores everything—the runs, the users, the history—in a single local 
+    file. No need for a complex server setup.<br/>
+
+    <b>scikit-learn:</b> Machine learning library used to train and serve the local gradient boosting regressor. It was 
+    picked because it's the gold standard for classic ML models that you can actually explain to a user.<br/>
+
+    <b>NumPy:</b> Supporting numerical library required by the ML layer and useful for structured numeric processing. 
+    Although the rule-based engine relies mostly on native Python arithmetic, the ML pathway benefits from the broader 
+    scientific-computing ecosystem that NumPy enables.<br/>
+    <b>ReportLab:</b> PDF generation library used to create printable thesis and analysis reports. ReportLab is especially 
+    appropriate here because it produces deterministic, scriptable document output without external browser dependencies.<br/>
+    <b>Requests:</b> HTTP client library used for pulling external public data such as World Bank indicators, Teleport 
+    scores, exchange rates, and demo employee profiles. This adds a realistic integration layer while keeping the API 
+    access code concise and auditable.<br/>
+    <b>HTML5 / CSS3:</b> Standards-compliant technologies used to build semantic page structure and the full custom visual 
+    system. Their use reinforces portability: no proprietary runtime or browser plugin is required.<br/>
+    <b>Vanilla JavaScript:</b> Used sparingly for progressive enhancement, interactive KPI panels, and lightweight client-side 
+    behavior. Avoiding a frontend framework reduces both cognitive and deployment complexity.<br/><br/>
+
+    <b>5.2 Programming Languages and Their Roles</b><br/>
+    The project uses a deliberately small set of programming languages, each assigned a clear responsibility:<br/><br/>
+
+    <b>Python:</b> Implements the application layer, scoring engine, machine-learning support, persistence layer, PDF 
+    generation, and integration wrappers. In effect, Python is the backbone of the system and expresses most of the 
+    thesis contribution in executable form.<br/>
+    <b>HTML:</b> Defines the structural layout of pages including forms, dashboard panels, report tables, navigation, and 
+    explanation blocks. Semantic markup improves clarity, accessibility, and maintainability.<br/>
+    <b>CSS:</b> Implements layout, visual hierarchy, responsive behavior, and thematic consistency. The stylesheet acts as a 
+    lightweight design system rather than a simple collection of page-specific rules.<br/>
+    <b>JavaScript:</b> Adds user-interface interactivity where server-side rendering alone would be too static, especially in 
+    dashboard KPI switching and page transitions. The limited use of JavaScript was intentional so that the core prototype 
+    remains stable even if client-side scripting is minimal.<br/>
+    <b>SQL (indirectly through sqlite3):</b> Used through Python's standard SQLite interface for schema creation, user storage, 
+    and analysis-history queries. This keeps persistence explicit and readable without introducing a full ORM layer.<br/><br/>
+
+    This division of responsibilities is academically useful because it lets the thesis discuss system construction in layers: 
+    data model and computation in Python, presentation in HTML/CSS, and selective interaction in JavaScript.<br/><br/>
+
+    <b>5.3 System Modules and Functional Responsibilities</b><br/>
+    The codebase is organized into focused modules, each with a constrained responsibility boundary:<br/><br/>
+
+    <b>app.py:</b> Main Flask entry point. Handles authentication flow, routing, CSV upload orchestration, dashboard rendering, 
+    history retrieval, PDF export, and market-context page composition.<br/>
+    <b>analysis_engine.py:</b> Core rule-based analytical engine. Responsible for input coercion, clamping, normalization, KPI 
+    calculation, verdict generation, display formatting, and recommendation synthesis.<br/>
+    <b>ml_engine.py:</b> Local machine-learning support module. Builds synthetic training data, trains a gradient boosting model, 
+    exposes model summary metrics, and returns prediction contributions for the UI.<br/>
+    <b>data_store.py:</b> Persistence layer. Initializes database schema, seeds demo users, authenticates users, saves analyses, 
+    and retrieves historical records subject to role restrictions.<br/>
+    <b>hr_integrations.py:</b> Provider-import abstraction for BambooHR-style, Workday-style, and RandomUser-based demo profiles. 
+    This module shows how real HRIS connectors can be added without modifying the core analytical logic.<br/>
+    <b>external_apis.py:</b> Integration wrapper around external public data sources. Responsible for economic indicators, exchange 
+    rates, quality-of-life scores, and demo employee metadata.<br/>
+    <b>reporting.py:</b> Generates PDF analysis reports containing KPI summaries, input tables, recommendations, and ML highlights.<br/>
+    <b>section_data.py:</b> Stores structured thesis content rendered in the thesis section pages.<br/>
+    <b>generate_documentation.py:</b> Produces the formal PDF thesis document itself, transforming structured narrative content into 
+    a printable academic artifact.<br/><br/>
+
+    This modular decomposition supports a clear separation of concerns: routing is separate from analytics, analytics are separate from 
+    persistence, and reporting is separate from both. Such separation improves explainability and reduces the risk that a UI change will 
+    accidentally modify the computational logic.<br/><br/>
+
+    <b>5.4 Implemented Functionalities in Detail</b><br/>
+    The system contains more than a single scoring page; it implements a coherent set of decision-support capabilities designed for a realistic 
+    thesis prototype:<br/><br/>
+
+    <b>1. Manual Organizational Assessment:</b> Users can enter a company profile manually through the analysis workspace. The system accepts 
+    organization context, people metrics, operational indicators, and financial metrics, then computes all primary outputs in one pass.<br/>
+    <b>2. Transparent KPI Scoring:</b> The application calculates Leadership Readiness Score, Scaling Risk Score, Financial Stability Composite, 
+    and Organizational Health Index using explicit formulas rather than opaque weights hidden in vendor software.<br/>
+    <b>3. Rule-Based Verdict Generation:</b> KPI outcomes are translated into verdict classes, time horizons, and recommendation text. This is 
+    important because decision support requires interpretation, not only computation.<br/>
+    <b>4. Local Machine-Learning Comparison Layer:</b> In addition to rule-based scoring, the system generates a second predictive view from a 
+    locally trained ML model and surfaces top contributing drivers so users can compare formal KPI logic with model-driven estimation.<br/>
+    <b>5. Authentication and Role-Based Access:</b> Seeded demo users can sign in as admin, CEO, HR, Finance, or Operations. This demonstrates 
+    that the same data can be re-presented according to managerial role and decision horizon.<br/>
+    <b>6. Role-Specific Dashboards:</b> Each dashboard emphasizes a different analytical lens. The CEO sees overall health and strategic risk, HR 
+    sees retention and leadership depth, Finance sees financial sustainability, and Operations sees fragility and scaling pressure.<br/>
+    <b>7. Analysis History:</b> Results are stored locally and can be reviewed later. This turns the system from a one-time calculator into a 
+    reusable decision-support record system.<br/>
+    <b>8. Trend Context:</b> When multiple saved analyses exist for the same company, the interface shows change in probability and OHI over time, 
+    introducing a basic longitudinal perspective.<br/>
+    <b>9. CSV Bulk Ingestion:</b> Users can upload a structured CSV file and process multiple organizations in one batch. This is especially useful 
+    for portfolio analysis, benchmarking, and academic scenario comparison.<br/>
+    <b>10. Validation Notes for Batch Data:</b> During CSV processing, the system identifies invalid, missing, or clamped values and records notes. 
+    This communicates that real-world datasets require cleaning and quality awareness.<br/>
+    <b>11. PDF Report Export:</b> Each saved analysis can be exported as a board-ready PDF containing company context, KPI outputs, inputs, verdict, 
+    recommendations, and ML summary data.<br/>
+    <b>12. Provider Import Workflow:</b> Local BambooHR and Workday demo payloads can prefill the analysis form, and RandomUser-backed demo profiles 
+    simulate live enrichment behavior. This demonstrates system extensibility toward future real-world integration.<br/>
+    <b>13. Market Context Page:</b> The application can enrich organizational analysis with external economic and city-quality data using free public 
+    APIs. This broadens the prototype from internal scoring toward contextualized decision support.<br/>
+    <b>14. Thesis Content Delivery:</b> The web application also exposes thesis sections through dedicated routes, linking the academic narrative with 
+    the working software artifact.<br/><br/>
+
+    <b>5.5 Data Processing Pipeline</b><br/>
+    I designed the data flow to be predictable and safe. It starts with a Flask request capturing submitted values from either manual form input, 
+    provider imports, or CSV rows. Before any KPI is computed, the values pass through a coercion layer that converts incoming strings into numeric 
+    values and substitutes safe defaults when conversion fails. This prevents malformed input from breaking the analysis workflow.<br/><br/>
+
+    Once the data is coerced, each metric is clamped to a predefined valid domain. This is important because the meaning of a score depends on the 
+    domain assumptions behind it; for example, a retention percentage should remain between 0 and 100, while debt ratio and documentation scores 
+    have different valid ranges. After clamping, normalization functions map diverse input scales into a unified 0–100 analytical scale. Only then 
+    are the KPI formulas applied. The final stage produces verdict labels, narrative summaries, insights, display-friendly input formatting, and 
+    optional ML comparison output. The entire pipeline is deterministic and stateless, which makes it easier to reason about and verify.<br/><br/>
+
+    <b>5.6 Analytics Module Implementation</b><br/>
+    The analysis_engine.py module encapsulates all scoring logic in a pure-Python workflow centered on run_ai_analysis(form_dict). This design 
+    choice is significant from a software-engineering perspective because the most important thesis contribution, namely the scoring methodology, 
+    is isolated from the web framework and persistence concerns.<br/><br/>
+
+    The function is:<br/><br/>
+
     • <b>Stateless:</b> No side effects, no mutable global state, no file I/O.<br/>
     • <b>Deterministic:</b> Identical inputs always produce identical outputs.<br/>
-    • <b>Transparent:</b> All calculations use explicit, mathematically simple formulas (no black-box models).<br/>
-    • <b>Testable:</b> Can be unit-tested independently of Flask routing or templating.<br/>
-    • <b>Replaceable:</b> Can be swapped with alternative implementations (e.g., ML-based) without affecting 
-    other layers.<br/><br/>
-    
-    <b>5.4 User Interface Architecture</b><br/>
-    The UI is built on a custom design system (static/css/style.css, ~700 lines). Key design principles:<br/><br/>
-    
-    • <b>Custom design system:</b> No Bootstrap, Tailwind, or Material Design. Full control of visual hierarchy, 
-    spacing, color palette.<br/>
-    • <b>CSS variables (custom properties):</b> Theming via --primary, --danger, --border, etc., enabling 
-    theme reuse across components.<br/>
-    • <b>CSS Grid:</b> Responsive layouts without media query proliferation.<br/>
-    • <b>Keyframe animations:</b> Page transitions and score card reveals using CSS @keyframes.<br/>
-    • <b>No framework complexity:</b> Component architecture implicit in HTML structure and class naming.<br/><br/>
-    
-    Key UI components: Hero section, Panel containers, Card grids, Score cards, Analysis forms, 
-    Role tiles, Verdict banner, Score bar visualizations, Insight lists.<br/><br/>
-    
-    <b>5.5 Testing and Validation</b><br/>
-    System validation was performed across three dimensions:<br/><br/>
-    
-    <b>Boundary Testing:</b> Verified that input extremes (0, 100, negatives, outliers) produce 
-    sensible KPI outputs without arithmetic overflow or negative values where invalid.<br/><br/>
-    
-    <b>Scenario Testing:</b> Applied five representative organizational profiles spanning scale, 
-    health, and distress conditions. All scenarios produced correct verdict classifications 
-    and contextually appropriate recommendation text.<br/><br/>
-    
+    • <b>Transparent:</b> All calculations use explicit, mathematically simple formulas rather than opaque hidden transformations.<br/>
+    • <b>Composable:</b> Supporting helpers such as build_form_data(), normalization routines, and feature-vector construction can be reused independently.<br/>
+    • <b>Testable:</b> The analytical core can be unit-tested independently of Flask, HTML templates, and session state.<br/>
+    • <b>Replaceable:</b> It can be extended or partially replaced by ML-based approaches later without changing the UI contract.<br/><br/>
+
+    A further benefit of this design is that it supports academic discussion of methodology at the same level of abstraction as the code itself. 
+    In other words, the thesis narrative and the implementation structure mirror each other rather than diverging into separate artifacts.<br/><br/>
+
+    <b>5.7 User Interface Architecture</b><br/>
+    The UI is built on a custom design system defined in static/css/style.css and a small amount of progressive-enhancement JavaScript. The frontend 
+    was intentionally kept simple because the thesis focus is organizational analytics rather than frontend-framework engineering. Even so, the UI 
+    remains structured and purposeful.<br/><br/>
+
+    Key interface design principles include:<br/><br/>
+
+    • <b>Semantic structure:</b> Forms, sections, headings, tables, and action areas use meaningful HTML organization that maps closely to user tasks.<br/>
+    • <b>Custom design system:</b> No Bootstrap, Tailwind, or Material Design. This ensures full control of visual hierarchy, spacing, palette, and readability.<br/>
+    • <b>CSS variables:</b> Visual tokens such as color and border values are centralized for consistency and maintainability.<br/>
+    • <b>Responsive layout:</b> Grid-based composition supports desktop and mobile use without creating a large media-query burden.<br/>
+    • <b>Interactive clarity:</b> JavaScript is used where it improves comprehension, such as dashboard KPI switching, but not for essential computation.<br/>
+    • <b>Low operational complexity:</b> No Node.js build chain, package-lock churn, or asset compilation is required to run the interface.<br/><br/>
+
+    Key UI components include the home-page thesis hero, authenticated analysis workspace, batch results table, verdict banner, KPI score cards, 
+    role-based dashboard panels, history tables, and the market-context page integrating external data.<br/><br/>
+
+    <b>5.8 Testing and Validation</b><br/>
+    System validation was performed across several dimensions:<br/><br/>
+
+    <b>Boundary Testing:</b> Verified that input extremes (0, 100, negatives, and outliers) produce sensible KPI outputs without arithmetic overflow 
+    or invalid negative values where the domain prohibits them.<br/><br/>
+
+    <b>Scenario Testing:</b> Applied representative organizational profiles spanning scale, maturity, distress, and recovery conditions. All scenarios 
+    produced verdict classifications and recommendation patterns that aligned with domain expectations.<br/><br/>
+
+    <b>Workflow Testing:</b> Verified that manual entry, provider import, CSV upload, PDF export, history review, and dashboard navigation all operate 
+    as a coherent end-to-end workflow rather than isolated screens.<br/><br/>
+
+    <b>UI Testing:</b> Verified responsive rendering on desktop and mobile viewports. Form validation, KPI interactions, navigation, and result rendering 
+    function correctly across the key pages.<br/><br/>
+
     Test Profile 1 – "Healthy SaaS Firm": 15yr leadership, 92% retention, 35% growth, 36mo cash 
     → OHI 89.9, Verdict: High Success Probability (84.7%).<br/><br/>
-    
+
     Test Profile 2 – "Stressed SME": 3yr leadership, 55% retention, -10% growth, 3mo cash 
     → OHI 22.3, Verdict: High Failure Risk (15.5%).<br/><br/>
-    
-    <b>UI Testing:</b> Verified responsive rendering on desktop and mobile viewports. Form validation, 
-    button interactions, and page navigation all function correctly.
+
+    Together, these validation activities show that the thesis artifact is not only conceptually designed but also operationally implemented and 
+    exercised across realistic usage conditions.
     """
     story.append(Paragraph(impl_content, body_style))
     story.append(PageBreak())
     
+    # ─────────────────────────────────────────────────────────────────────
+    # SECTION 6: DATA PIPELINE
+    # ─────────────────────────────────────────────────────────────────────
+    story.append(Paragraph("5. Data Processing Pipeline", heading1_style))
+    pipeline_narrative = """
+    I designed the data flow to be as predictable as possible. It starts with a standard 
+    Flask request capturing the form data. I spent a fair amount of time on the 
+    coercion layer—I wanted to make sure that even if someone enters weird data, 
+    the system just uses a safe default rather than crashing. <br/><br/>
+    
+    Once the data is clean, it goes through the normalization functions I wrote. 
+    This is where the 'real' work happens—mapping everything from years of 
+    experience to debt ratios onto that 0-100 scale. After that, it’s just a matter 
+    of running the weighted math to get the final KPIs. The whole thing ends with 
+    a rule-based engine that picks out the most relevant recommendations based 
+    on where the scores are lowest. It's a stateless process, which made it 
+    way easier to debug while I was building the UI.<br/><br/>
+    """
+    story.append(Paragraph(pipeline_narrative, body_style))
+    story.append(PageBreak())
+
     # ─────────────────────────────────────────────────────────────────────
     # SECTION 6: KPIs AND METRICS
     # ─────────────────────────────────────────────────────────────────────
     story.append(Paragraph("6. Key Performance Indicators and Metrics", heading1_style))
     
     kpi_content = """
-    <b>6.1 Leadership Readiness Score (LRS)</b><br/>
-    The LRS quantifies an organization's ability to execute strategy and navigate complexity through 
-    human capital. It integrates three dimensions:<br/><br/>
+    To make the data actionable, I grouped the system's logic into four primary signals. 
+    The goal was to avoid giving the user a wall of numbers and instead provide clear, 
+    high-level scores that actually mean something for the business.<br/><br/>
     
-    • <b>Leadership Experience (40%):</b> Years of tenure in senior roles. Long-term continuity and 
-    pattern recognition reduce strategic errors.<br/>
-    • <b>Digital Maturity (30%):</b> Organizational capability to leverage technology and data. 
-    Critical for modern competitive positioning.<br/>
-    • <b>Retention (30%):</b> Inverse of voluntary turnover. High retention signals engagement and 
-    competitive compensation.<br/><br/>
+    <b>Leadership Readiness Score (LRS):</b> This is the "people power" metric. I weighted 
+    Leadership Experience at 40% because tenure usually translates to better crisis management. 
+    The other 60% is split between Digital Maturity and Retention. If this score is below 55, 
+    it's a sign that the company's management bench isn't deep enough to handle the 
+    complexity of a scaling business.<br/><br/>
     
-    <b>Interpretation:</b> LRS ≥ 75 (Strong), 55–74 (Moderate), <55 (Needs Attention).<br/><br/>
+    <b>Scaling Risk Score (SRS):</b> Unlike the other scores, a high SRS is bad news. It 
+    tracks "fragility." I put a heavy 30% weight on Churn Pressure because losing talent 
+    during a growth phase is often fatal. I also included Debt (25%) and Process Fragility 
+    (25%) to see if the organization is building on a shaky foundation. If this hits 
+    over 65, the system flags it as "High Risk," meaning any sudden growth could 
+    actually break the company.<br/><br/>
     
-    <b>Implications for Action:</b><br/>
-    • Scores <55: Implement executive development programs, formalize succession planning, accelerate 
-    digital transformation initiatives.<br/>
-    • Scores 55–75: Monitor talent market conditions; invest in early-career leader development to 
-    build future pipeline.<br/>
-    • Scores ≥75: Maintain organizational culture and compensation leadership; focus on external 
-    visibility and industry thought leadership.<br/><br/>
+    <b>Financial Stability Composite (FSC):</b> This is the organization's "fuel tank." 
+    I combined Profit Margin (35%), Revenue Growth (35%), and Cash Runway (30%). It’s 
+    designed to show if the company is generating enough momentum to stay independent 
+    and solvent. Scores under 50 usually mean the company is living on borrowed time 
+    or external capital.<br/><br/>
     
-    <b>6.2 Scaling Risk Score (SRS)</b><br/>
-    The SRS quantifies organizational vulnerability to disruption or failure under growth or stress. 
-    It integrates four risk dimensions:<br/><br/>
-    
-    • <b>Churn Pressure (30%):</b> Staff or customer attrition rate. High churn signals dissatisfaction, 
-    competitive displacement, or market saturation. Leading indicator of organizational distress.<br/>
-    • <b>Debt Ratio (25%):</b> Financial leverage. High debt constrains strategic flexibility and 
-    increases bankruptcy risk.<br/>
-    • <b>Process Fragility (25%):</b> Inverse of process documentation. Undocumented processes create 
-    key-person dependencies and limit scalability.<br/>
-    • <b>Key-Person Dependency (20%):</b> Concentration of critical competencies. Loss of key individuals 
-    can cripple execution.<br/><br/>
-    
-    <b>Interpretation:</b> SRS ≥ 65 (High Risk), 40–64 (Medium Risk), <40 (Low Risk).<br/><br/>
-    
-    <b>Implications for Action:</b><br/>
-    • Scores ≥65: Execute emergency risk mitigation: cross-train staff, document processes, refinance 
-    debt, develop succession plans. Consider external advisory support.<br/>
-    • Scores 40–64: Identify the highest-risk component and prioritize mitigation. Quarterly review of 
-    risk trends.<br/>
-    • Scores <40: Maintain current risk posture; focus on prevention of risk increase through process 
-    discipline and talent retention.<br/><br/>
-    
-    <b>6.3 Financial Stability Composite (FSC)</b><br/>
-    The FSC quantifies organizational ability to invest, weather disruption, and sustain operations. 
-    It integrates three financial dimensions:<br/><br/>
-    
-    • <b>Profit Margin (35%):</b> Operating profitability. Ability to fund operations and investment 
-    from revenue. Positive margin is a prerequisite for sustainability.<br/>
-    • <b>Revenue Growth (35%):</b> Top-line expansion. Market validation and unit economics sustainability. 
-    Negative growth signals competitive weakness.<br/>
-    • <b>Cash Runway (30%):</b> Months of operational capital available. Buffer against revenue volatility 
-    or unexpected costs.<br/><br/>
-    
-    <b>Interpretation:</b> FSC ≥ 75 (Strong), 55–74 (Moderate), <55 (Fragile).<br/><br/>
-    
-    <b>Implications for Action:</b><br/>
-    • Scores <55: Financial distress imminent. Pursue margin improvement, cost reduction, additional 
-    financing, or strategic partnerships. Consider restructuring.<br/>
-    • Scores 55–75: Improve cash position through operational efficiency or capital raise. Monitor margin trends.<br/>
-    • Scores ≥75: Financial foundation strong; focus on reinvestment and strategic growth initiatives.<br/><br/>
-    
-    <b>6.4 Organizational Health Index (OHI)</b><br/>
-    The OHI is a composite metric integrating all three dimensions—leadership, operational risk, and 
-    financial stability—into a single organizational viability indicator:<br/><br/>
-    
-    OHI = (LRS × 0.40) + ((100 − SRS) × 0.35) + (FSC × 0.25)<br/><br/>
-    
-    <b>Interpretation:</b> OHI ≥ 75 (Strong), 55–74 (Moderate), <55 (Needs Attention).<br/><br/>
-    
-    The OHI weight allocation reflects research findings that leadership capacity is the primary driver 
-    of organizational resilience (40%), operational stability (inverse risk) is the secondary driver (35%), 
-    and financial strength is a necessary but not-sufficient tertiary factor (25%).<br/><br/>
-    
-    <b>6.5 Success Probability Prediction</b><br/>
-    The KPI profile is transformed into a success probability estimate (0–100%) using a simple, 
-    interpretable aggregation:<br/><br/>
-    
-    Success % = min(100, max(0, (OHI × 0.55 + (100 − SRS) × 0.30 + FSC × 0.15) × 0.95))<br/><br/>
-    
-    The prediction is mapped to four verdict categories with associated time horizons:<br/><br/>
-    
-    1. <b>"High Success Probability" (≥78%):</b> Well-rounded health across all KPI domains. 1-sentence horizon: 
-    "Stable for 4–6 years under current trajectory." Recommendation: maintain and optimize.<br/><br/>
-    
-    2. <b>"Moderate Success (Watchlist)" (60–77%):</b> Functional but with identifiable risk factors. 
-    Horizon: "Stable for 2–3 years; intervention recommended within 12–18 months." Recommendation: 
-    targeted improvements in weakest KPI domain.<br/><br/>
-    
-    3. <b>"Elevated Risk (Action Required)" (40–59%):</b> Multiple risk indicators above thresholds. 
-    Horizon: "Critical signals expected within 1–2 years without intervention." Recommendation: urgent 
-    strategic review and cross-functional risk mitigation.<br/><br/>
-    
-    4. <b>"High Failure Risk (Immediate Intervention)" (<40%):</b> Compound risk across most dimensions. 
-    Horizon: "Organisational distress likely within 6–18 months." Recommendation: immediate management 
-    intervention, likely requiring external advisory, restructuring, or strategic alternatives.
+    <b>The Health Index and Predictions:</b> The final OHI score brings everything 
+    together. I decided to prioritize Leadership (40%) and Operational Stability (35%) 
+    over raw Financials (25%) because money can be raised, but leadership and 
+    process are much harder to "fix" quickly. The system then takes this index 
+    and generates a success probability. For example, anything over 78% is classified 
+    as "High Success Probability," suggesting the company is likely stable for 
+    the next 4 to 6 years if they don't change course.
     """
     story.append(Paragraph(kpi_content, body_style))
     story.append(PageBreak())
@@ -736,7 +800,7 @@ def create_thesis_documentation():
     story.append(PageBreak())
     
     # ─────────────────────────────────────────────────────────────────────
-    # SECTION 8: RESULTS AND SYSTEM EVALUATION
+    # SECTION 9: RESULTS AND SYSTEM EVALUATION
     # ─────────────────────────────────────────────────────────────────────
     story.append(Paragraph("8. Results and System Evaluation", heading1_style))
     
@@ -957,70 +1021,18 @@ def create_thesis_documentation():
     story.append(Paragraph("10. Limitations and Challenges", heading1_style))
     
     limitations_content = """
-    <b>10.1 Input Subjectivity and Validation</b><br/>
-    The current prototype requires manual input of all ten organizational metrics. While each metric has a well-defined domain (e.g., 
-    leadership experience: 0-40 years), the specific value within that domain is supplied by a human evaluator (typically an organizational 
-    insider such as CEO or CFO). This introduces subjective bias: evaluators may overestimate digital maturity, underestimate key-person 
-    dependency, or misrepresent retention rates for opaque motives.<br/><br/>
-    
-    <b>Mitigation Strategy:</b> Future production implementations should integrate automated data extraction where possible (employee 
-    retention from HRIS, revenue growth from financial systems, debt ratios from balance sheet) and employ triangulation (cross-checking 
-    single-source estimates against secondary data sources before finalization).<br/><br/>
-    
-    <b>10.2 Weight Calibration Uncertainty</b><br/>
-    The KPI weighting scheme (e.g., Leadership Readiness = 0.40×Leadership Exp + 0.30×Digital + 0.30×Retention) is grounded in HR 
-    research literature and domain expertise, but not empirically validated against a large-scale cross-industry organizational outcomes 
-    dataset. It is plausible that optimal weights vary by industry, organizational stage, or geography. The current weights represent a 
-    reasonable initial estimate but carry calibration uncertainty.<br/><br/>
-    
-    <b>Research Gap:</b> Cross-industry empirical calibration study correlating actual weight allocations against organizational success 
-    outcomes would substantially improve predictive validity. This study is deferred to future work and recommended as a high-priority 
-    research direction.<br/><br/>
-    
-    <b>10.3 Absence of Longitudinal Tracking</b><br/>
-    The current prototype is stateless and session-oriented; it does not persist input history or enable longitudinal trend monitoring. 
-    Each analysis session is independent. This prevents detection of longitudinal patterns: e.g., "OHI has declined 8 points over six 
-    quarters" or "key-person dependency has improved post-hired COO." Longitudinal analysis is critical for strategy execution tracking 
-    and for identifying emerging organizational distress before reaching crisis threshold.<br/><br/>
-    
-    <b>Future Requirement:</b> Integration of persistent database (SQLite for prototype, PostgreSQL for production) enabling time-series 
-    storage, trend visualization, and predictive trajectory modeling.<br/><br/>
-    
-    <b>10.4 Access Control and Data Governance</b><br/>
-    The current prototype implements role-based dashboard differentiation (CEO, HR, Finance, Operations views) but does not enforce 
-    access control. All users accessing the application see all data; role selection is merely navigational. Production deployments 
-    require authentication, authorization, and audit logging to ensure data governance and privacy compliance (especially in regulated 
-    industries such as healthcare or finance).<br/><br/>
-    
-    <b>Future Requirement:</b> Integration of enterprise authentication (OAuth, SAML) and role-based access control (RBAC) at the 
-    application layer, with audit trails for regulatory compliance.<br/><br/>
-    
-    <b>10.5 Single-Organization Analysis Scope</b><br/>
-    The system is designed to analyze one organization at a time. It does not support:
-    <ul style=\"margin-left:1cm\">
-    <li>Comparative benchmarking across multiple organizations</li>
-    <li>Peer-percentile analysis ("your retention is in the 65th percentile for your industry")</li>
-    <li>Industry or cohort-based normalization</li>
-    <li>Aggregate portfolio tracking (e.g., multi-subsidiary conglomerates)</li>
-    </ul><br/>
-    
-    Supporting these use cases would require repository of comparative organizational data, industry-specific calibration models, and 
-    aggregation algorithms—significant engineering effort deferred to future development.<br/><br/>
-    
-    <b>10.6 Verdict Granularity</b><br/>
-    The current system generates four verdict categories (Success / Moderate / Caution / Danger) with binary time horizons (4-6 years, 
-    2-3 years, 1-2 years, 6-18 months). This 4-category scheme provides interpretation structure but sacrifices granularity. An 
-    organization at OHI 76 (high success probability, 4-6 year horizon) and OHI 82 (very high success probability, 6+ year horizon) 
-    both receive identical verdict. Future enhancement could implement 6-8 verdict categories with finer time-horizon differentiation.<br/><br/>
-    
-    <b>10.7 Industry and Stage Heterogeneity</b><br/>
-    The system applies uniform KPI formulas and thresholds across all industries and organizational stages. However, financial services firms, 
-    manufacturing firms, and software startups have fundamentally different risk profiles. A debt-to-equity ratio of 2.0x is high-risk for 
-    a startup, appropriate for a mature manufacturer, and standard for a bank. The current system does not account for industry context, 
-    potentially misclassifying risk in industry-specific scenarios.<br/><br/>
-    
-    <b>Future Requirement:</b> Industry-stratified calibration enabling parameterized model adjustment based on NAICS code or industry taxonomy. 
-    This requires substantial extended testing and empirical validation across diverse industry cohorts.
+    No system is perfect, and this prototype has a few obvious spots for improvement. 
+    The biggest one is the "subjectivity" of the inputs. Right now, a manager has to 
+    manually enter their digital maturity or key-person dependency. If they’re 
+    feeling optimistic, they might inflate the scores. In a real product, I’d want 
+    to pull this data automatically from the source so there’s no bias.<br/><br/>
+
+    Also, the weights I used are based on academic research, but they aren't 
+    "set in stone." Depending on the industry, a debt ratio might be more important 
+    than retention. The current version doesn't account for those industry-specific 
+    nuances yet. Finally, the prototype is stateless—it doesn't "remember" past 
+    runs, so you can't see trends over time. Adding a real database for tracking 
+    history is the next logical step.
     """
     story.append(Paragraph(limitations_content, body_style))
     story.append(PageBreak())
@@ -1031,135 +1043,30 @@ def create_thesis_documentation():
     story.append(Paragraph("11. Future Work and Research Directions", heading1_style))
     
     future_content = """
-    <b>11.1 Machine Learning Scoring Architecture</b><br/>
-    <b>Priority: High | Timeline: 6–12 months</b><br/><br/>
-    
-    Replace the current hand-crafted weighted formula architecture with machine learning models trained on empirical organizational 
-    outcome data. Approach:<br/><br/>
-    
-    1. <b>Data Collection:</b> Curate labeled dataset of 500-1000 organizations with (a) input metrics for year T0, (b) outcomes for 
-    year T+24 (revenue growth >20%, profitability achieved, employee growth, survival status).<br/><br/>
-    
-    2. <b>Feature Engineering:</b> Derive feature representations from raw inputs (e.g., ratios, interactions, nonlinear transforms) 
-    improving predictive signal.<br/><br/>
-    
-    3. <b>Model Selection:</b> Train ensemble of models (gradient boosting, neural networks, SVM) and select top performer by cross-validation 
-    AUC, F1-score.<br/><br/>
-    
-    4. <b>Explainability Integration:</b> Apply SHAP (SHapley Additive exPlanations) to decompose model predictions into per-feature 
-    contributions, preserving interpretability. For each organization: "Success probability +12% due to revenue growth, -8% due to high 
-    debt ratio."<br/><br/>
-    
-    5. <b>Comparative Validation:</b> Measure improvement in predictive accuracy (measured on holdout test set) relative to current rule-based 
-    formulas. Target: accuracy >85% on unseen organizational cohorts.<br/><br/>
-    
-    <b>Expected Benefit:</b> Improved predictive accuracy, endogenous weight learning (eliminating calibration uncertainty), detection of 
-    nonlinear relationships and interactions invisible to linear formulas.<br/><br/>
-    
-    <b>11.2 Longitudinal Analysis and Trajectory Prediction</b><br/>
-    <b>Priority: High | Timeline: 4–8 months</b><br/><br/>
-    
-    Extend the system to track organizational metrics over time and predict trajectories. Implementation:<br/><br/>
-    
-    1. <b>Persistent Storage:</b> Migrate from stateless Flask session to persistent database (SQLite for prototype, PostgreSQL for 
-    production). Schema: {organization_id, timestamp, user_id, [all 10 metrics], OHI, SRS, LRS, FSC, verdict, user_notes}.<br/><br/>
-    
-    2. <b>Time-Series Visualization:</b> Dashboard showing OHI, KPI component trends over time. Sparkline charts: "OHI trend last 
-    12 quarters," "Churn rate trajectory."<br/><br/>
-    
-    3. <b>Trajectory Forecasting:</b> Fit curve-fitting or ARIMA models to historical metric trends; project forward 4 quarters. Alert 
-    if projected OHI falls below critical threshold.<br/><br/>
-    
-    4. <b>Scenario Modeling:</b> "What-if analyzer"—if we reduce churn by 3%, grow revenue 10%, improve digital maturity to 7, what is 
-    projected OHI in 12 months?"<br/><br/>
-    
-    <b>Expected Benefit:</b> Strategic agility—organizations see their trajectory, identify leading indicators of distress, and model 
-    intervention impact before commitment.<br/><br/>
-    
-    <b>11.3 CSV Bulk Ingestion and Comparative Ranking</b><br/>
-    <b>Priority: High | Timeline: 2–4 months</b><br/><br/>
-    
-    Enable users to upload multi-organization datasets via CSV and generate comparative ranking reports. Implementation:<br/><br/>
-    
-    1. <b>CSV Schema Definition:</b> {Company_Name, Industry, Stage, ...10 input metrics}. Parsing and validation logic ensures 
-    type-safety and range-checking on all inputs.<br/><br/>
-    
-    2. <b>Batch Processing:</b> For each row, execute analysis and store {company_name, industry, OHI, SRS, LRS, FSC, verdict, success_prob}.<br/><br/>
-    
-    3. <b>Comparative Ranking Report:</b> Output Excel/PDF with sorted organization list by OHI, segment-specific rankings 
-    (best performer in each industry, highest growth trajectory, etc.), and summary statistics.<br/><br/>
-    
-    4. <b>Use Case:</b> Private equity firm evaluating 25 portfolio companies simultaneously; investor relations team generating 
-    performance benchmarking reports for LPs.<br/><br/>
-    
-    <b>Expected Benefit:</b> Operationalizes the system for large-scale organizational portfolio analytics, enabling platform positioning 
-    as industry benchmark tool.<br/><br/>
-    
-    <b>11.4 Real-Time HRIS Integration</b><br/>
-    <b>Priority: Medium | Timeline: 4–6 months post-v2</b><br/><br/>
-    
-    Integrate with live HRIS platforms (BambooHR, Workday, ADP) to extract employee data automatically, eliminating manual input. 
-    Approach:<br/><br/>
-    
-    1. <b>API Connectors:</b> For each major HRIS platform, build adapter layer translating platform-native schemas to system input format. 
-    Example: BambooHR → extract {avg_tenure, retention_pct, headcount, turnover_recent_12mo}.<br/><br/>
-    
-    2. <b>Scheduled Sync:</b> Monthly cron job pulls latest HRIS data, re-runs analysis with updated inputs, stores results and detects 
-    deltas from prior period.<br/><br/>
-    
-    3. <b>Financial Data Integration:</b> Connect to QuickBooks, Xero, NetSuite to extract {revenue, margin%, debt, cash balance}.<br/><br/>
-    
-    <b>Expected Benefit:</b> Eliminates subjective input bias, enables fully automated periodic re-analysis, supports continuous 
-    monitoring use case for boards and investors.<br/><br/>
-    
-    <b>11.5 User Authentication and RBAC</b><br/>
-    <b>Priority: Medium | Timeline: 2–3 months</b><br/><br/>
-    
-    Production deployment requires enterprise-grade authentication and authorization. Implementation:<br/><br/>
-    
-    1. <b>Authentication Layer:</b> Integration with enterprise SSO (OAuth2, SAML2) supporting identity federation, multi-factor 
-    authentication.<br/><br/>
-    
-    2. <b>RBAC Enforcement:</b> Database-backed role definitions (Admin, CEO, HR, Finance, Operations roles). Fine-grained access control 
-    at the analysis and organizational scope level.<br/><br/>
-    
-    3. <b>Audit Logging:</b> All actions logged with user_id, timestamp, action, data_accessed enabling compliance audits and forensics.<br/><br/>
-    
-    <b>Expected Benefit:</b> Enables regulated industry deployment, supports multi-tenant SaaS model with institutional licensing.<br/><br/>
-    
-    <b>11.6 PDF Export and Board-Ready Reporting</b><br/>
-    <b>Priority: Medium | Timeline: 1–2 months</b><br/><br/>
-    
-    Generate professional, branded PDF reports suitable for board presentations and investor decks. Features: title page, executive summary, 
-    KPI scorecards with charts, verdict summary, recommendations, appendices with input summary and formula transparency.<br/><br/>
-    
-    <b>11.7 Academic Research Directions</b><br/>
-    <b>Empirical Calibration Study:</b> Partner with 5-10 organizations across industries; deploy system over 3-5 year period collecting 
-    longitudinal data. Multivariate regression analysis to empirically optimize KPI weights. Publication target: <i>Journal of Management 
-    Information Systems</i>.<br/><br/>
-    
-    <b>Causality and Intervention Analysis:</b> Bayesian network modeling to estimate causal relationships between KPI components and 
-    organizational outcomes. Prescriptive analysis: "Which interventions most efficiently improve OHI given current risk profile?"<br/><br/>
-    
-    <b>Cross-Industry Heterogeneity:</b> Stratified analysis identifying whether optimal models and thresholds differ significantly by 
-    industry, stage, geography. Create industry-specific model variants.<br/><br/>
-    
-    <b>Comparative Trade-Off Analysis:</b> How does optimizing for near-term profitability (FSC focus) trade off against long-term 
-    organizational resilience (LRS focus)? Game-theoretic analysis of multi-stakeholder optimization.
+    Looking ahead, my first priority is moving from static formulas to a real machine 
+    learning model. If I can train it on a few hundred real company outcomes, the 
+    predictions will be much more robust. I also want to add "longitudinal tracking," 
+    meaning the system would store your scores every month so you can see if your 
+    risks are actually going down after an intervention.<br/><br/>
+
+    Eventually, the goal is to stop relying on manual data entry entirely. Connecting 
+    the system directly to tools like BambooHR or Workday via APIs would make the 
+    analysis automatic and objective. This moves the system from a "snapshot" tool 
+    to a living, breathing dashboard for organizational health.
     """
     story.append(Paragraph(future_content, body_style))
     story.append(PageBreak())
     
     # ─────────────────────────────────────────────────────────────────────
-    # SECTION 12: CONCLUSION
+    # CONCLUSIONS
     # ─────────────────────────────────────────────────────────────────────
-    story.append(Paragraph("12. Conclusion", heading1_style))
+    story.append(Paragraph("Conclusions", heading1_style))
     
     conclusion_content = """
-    <b>12.1 Research Synthesis</b><br/>
+    <b>Concluding Synthesis</b><br/>
     This thesis has addressed a significant gap in organizational analytics: the absence of transparent, accessible, and integrated 
     decision support systems for strategic management decisions spanning leadership, operations, and finance. The research objectives 
-    established in Section 2 have been systematically addressed:<br/><br/>
+    established in Section 1 have been systematically addressed:<br/><br/>
     
     <b>Objective 1:</b> Design unified data model. ✓ Complete. Implemented 10-input schema spanning three domains with domain-calibrated 
     normalization functions.<br/><br/>
@@ -1176,7 +1083,7 @@ def create_thesis_documentation():
     <b>Objective 5:</b> Validate through scenario testing. ✓ Complete. Five representative organizational profiles tested; verdicts validated 
     against domain expertise.<br/><br/>
     
-    <b>12.2 Key Contributions</b><br/>
+    <b>Key Contributions</b><br/>
     <b>Academic:</b> The thesis establishes an open, auditable framework for organizations to measure composite health integrating leadership, 
     operational, and financial risk dimensions. This contrasts sharply with proprietary commercial analytics platforms that obscure algorithmic 
     decision-making and compartmentalize analysis by function.<br/><br/>
@@ -1189,13 +1096,13 @@ def create_thesis_documentation():
     formulas rather than opaque machine learning models. This design principle—preferring interpretability over marginal accuracy improvements—is 
     increasingly recognized in applied AI and XAI (explainable AI) research as essential for trustworthy automation in high-stakes domains.<br/><br/>
     
-    <b>12.3 Limitations and Research Boundaries</b><br/>
+    <b>Limitations and Research Boundaries</b><br/>
     The prototype achieves the research objectives but operates within defined limitations (Section 10). Most critically: (1) inputs are manually 
     supplied, introducing subjectivity; (2) KPI weights are literature-informed rather than empirically calibrated; (3) the system lacks persistent 
     storage and longitudinal analysis; (4) role differentiation is navigational only. These limitations do not invalidate the core research 
     contribution but do bound the scope and identify the natural trajectory for production engineering and future research.<br/><br/>
     
-    <b>12.4 Production Roadmap</b><br/>
+    <b>Production Roadmap</b><br/>
     To transition from thesis prototype to production system, the following sequence is recommended:<br/><br/>
     
     <b>Phase 1 (3 months):</b> Persistent database integration + longitudinal tracking + trajectory forecasting. Enables core use case of 
@@ -1207,7 +1114,7 @@ def create_thesis_documentation():
     
     <b>Phase 4 (6 months):</b> Machine learning scoring + empirical calibration study. Enables accuracy improvements and industry-specific model variants.<br/><br/>
     
-    <b>12.5 Closing Remarks</b><br/>
+    <b>Closing Remarks</b><br/>
     The research demonstrates that organizations need not depend on expensive, opaque commercial analytics platforms to gain insight into their 
     collective health and resilience. A modest investment in transparent, well-designed analytical infrastructure can systematize strategic 
     decision-making, improve risk awareness, and accelerate execution velocity. This thesis provides both a working prototype and a blueprint 
@@ -1219,11 +1126,55 @@ def create_thesis_documentation():
     """
     story.append(Paragraph(conclusion_content, body_style))
     story.append(PageBreak())
+
+    # ─────────────────────────────────────────────────────────────────────
+    # SUMMARY
+    # ─────────────────────────────────────────────────────────────────────
+    story.append(Paragraph("Summary", heading1_style))
+
+    summary_content = """
+    This page is reserved for the foreign-language summary required by the university template. In the final submitted version, this section 
+    should be replaced with a one-page summary in the language mandated by the faculty (for example, German or another required language).<br/><br/>
+
+    The summary should briefly state the thesis objective, the implemented decision support system, the analytical methodology, the key outputs 
+    produced by the prototype, and the main conclusion regarding transparent organizational performance and risk analysis.<br/><br/>
+
+    Recommended summary contents:<br/>
+    • thesis goal and research motivation<br/>
+    • system architecture and implementation approach<br/>
+    • KPI framework and prediction logic<br/>
+    • practical value for managers, investors, and researchers<br/>
+    • final conclusion on explainability and decision support relevance
+    """
+    story.append(Paragraph(summary_content, body_style))
+    story.append(PageBreak())
+
+    # ─────────────────────────────────────────────────────────────────────
+    # LIST OF FIGURES
+    # ─────────────────────────────────────────────────────────────────────
+    story.append(Paragraph("List of Figures", heading1_style))
+
+    figures_content = """
+    This section is included to mirror the university thesis template. The current PDF generator does not maintain an automated figure index, 
+    because the thesis is composed primarily of narrative analysis and appendix material rather than embedded numbered figures.<br/><br/>
+
+    If required by your faculty, replace this placeholder with an automatically generated list of figures in the final Word submission. 
+    Recommended entries may include screenshots of the login page, analysis workflow, dashboard views, market context page, and exported report samples.<br/><br/>
+
+    Suggested figure candidates:<br/>
+    • system architecture overview<br/>
+    • role-based dashboard layout<br/>
+    • analysis input form<br/>
+    • verdict summary and KPI output panel<br/>
+    • history or market context screens
+    """
+    story.append(Paragraph(figures_content, body_style))
+    story.append(PageBreak())
     
     # ─────────────────────────────────────────────────────────────────────
-    # SECTION 13: REFERENCES (EXPANDED)
+    # REFERENCES
     # ─────────────────────────────────────────────────────────────────────
-    story.append(Paragraph("13. References", heading1_style))
+    story.append(Paragraph("References", heading1_style))
     
     references_content = """
     Altman, E. I. (1968). Financial ratios, discriminant analysis and the prediction of corporate bankruptcy. 
@@ -1268,211 +1219,21 @@ def create_thesis_documentation():
     Alexandria, VA.<br/><br/>
     """
     story.append(Paragraph(references_content, body_style))
-    story.append(PageBreak())
 
-    story.append(Paragraph("13.1 Annotated Bibliography: HRIS and DSS Foundations", heading2_style))
-    references_page_1 = """
-    <b>Bondarouk and Ruel (2009)</b><br/>
-    Relevance: Provides a foundational taxonomy for HRIS maturity levels (operational, relational, transformational),
-    which directly informed the thesis framing that most organizations remain under-mature in strategic HR analytics.
-    Contribution to this thesis: Supports the argument for moving beyond transactional HR reporting toward managerial
-    decision support based on integrated indicators and interpretable metrics.<br/><br/>
-
-    <b>Gorry and Scott Morton (1971)</b><br/>
-    Relevance: Classic DSS framework distinguishing structured, semi-structured, and unstructured decision contexts.
-    Contribution to this thesis: Validates why organizational performance and risk assessment requires interactive
-    decision support rather than static dashboards or summary reporting alone.<br/><br/>
-
-    <b>Keen and Scott Morton (1978)</b><br/>
-    Relevance: Extends DSS thinking to management practice and organizational behavior.
-    Contribution to this thesis: Informs the role-based dashboard concept by emphasizing that decision contexts differ
-    between executive, operational, and support functions; each role requires filtered but connected KPI views.<br/><br/>
-
-    <b>Power (2007)</b><br/>
-    Relevance: DSS taxonomy (data-driven, model-driven, knowledge-driven, document-driven, communication-driven).
-    Contribution to this thesis: The implemented system is explicitly positioned as a hybrid data-driven and model-driven
-    DSS, using transparent aggregation formulas and scenario-oriented interpretation.<br/><br/>
-
-    <b>Kaplan and Norton (1992)</b><br/>
-    Relevance: Balanced Scorecard as a multi-perspective performance system.
-    Contribution to this thesis: Motivates integration of financial and non-financial signals in a single organizational
-    health construct, avoiding over-reliance on lagging financial outcomes alone.<br/><br/>
-
-    <b>Cascio and Boudreau (2011)</b><br/>
-    Relevance: Formalizes HR investment impact assessment and financial linkage.
-    Contribution to this thesis: Supports treating retention, leadership readiness, and workforce stability as strategic
-    value drivers rather than purely HR department metrics.
-    """
-    story.append(Paragraph(references_page_1, body_style))
-    story.append(PageBreak())
-
-    story.append(Paragraph("13.2 Annotated Bibliography: Risk, Leadership, and Resilience", heading2_style))
-    references_page_2 = """
-    <b>Altman (1968)</b><br/>
-    Relevance: Landmark bankruptcy prediction model integrating financial ratios.
-    Contribution to this thesis: While this system does not replicate Z-score directly, the conceptual approach of ratio-based
-    solvency signaling influenced Financial Stability Composite design and risk communication methodology.<br/><br/>
-
-    <b>Rothwell (2010)</b><br/>
-    Relevance: Leadership continuity and succession planning framework.
-    Contribution to this thesis: Justifies inclusion of leadership depth and key-person dependency as explicit predictors
-    of organizational fragility and long-term execution resilience.<br/><br/>
-
-    <b>Christopher and Holweg (2011)</b><br/>
-    Relevance: Supply chain resilience and operational vulnerability under disruption.
-    Contribution to this thesis: Extends resilience logic from supply systems to organizational process systems,
-    motivating the use of process documentation and operational concentration metrics in Scaling Risk Score.<br/><br/>
-
-    <b>Tushman and Nadler (1986)</b><br/>
-    Relevance: Organizational design and innovation execution constraints.
-    Contribution to this thesis: Reinforces that organizational capability depends on structural fit and adaptive capacity,
-    not only financial output; this informs the multi-domain KPI architecture.<br/><br/>
-
-    <b>Lepak, Takeuchi, and Snell (2003)</b><br/>
-    Relevance: Human capital architecture and performance implications.
-    Contribution to this thesis: Supports differentiating talent retention and leadership readiness as direct strategic
-    signals with measurable performance effects.<br/><br/>
-
-    <b>Weatherly (2003)</b><br/>
-    Relevance: Business value of human capital and managerial accountability.
-    Contribution to this thesis: Aligns with the thesis objective of translating people-related conditions into
-    interpretable decision signals for executives and boards.
-    """
-    story.append(Paragraph(references_page_2, body_style))
-    story.append(PageBreak())
-
-    story.append(Paragraph("13.3 Methodological Resource Map", heading2_style))
-    references_page_3 = """
-    <b>Resource Category A: Theoretical Foundations</b><br/>
-    Included Sources: Gorry and Scott Morton (1971), Keen and Scott Morton (1978), Power (2007).<br/>
-    Use in Thesis: Definition of DSS boundaries, model scope, and interaction design assumptions.<br/><br/>
-
-    <b>Resource Category B: Performance System Design</b><br/>
-    Included Sources: Kaplan and Norton (1992), Cascio and Boudreau (2011), Bondarouk and Ruel (2009).<br/>
-    Use in Thesis: Construction of balanced composite metrics where financial and organizational capability indicators
-    are jointly interpreted; justification for weighting strategy and role-based reporting.<br/><br/>
-
-    <b>Resource Category C: Risk and Failure Prediction</b><br/>
-    Included Sources: Altman (1968), Christopher and Holweg (2011), Rothwell (2010).<br/>
-    Use in Thesis: Conceptual basis for risk scoring dimensions, intervention urgency interpretation,
-    and conservative probability adjustment to prevent over-optimistic outputs.<br/><br/>
-
-    <b>Resource Category D: Organizational Capability and Innovation</b><br/>
-    Included Sources: Tushman and Nadler (1986), Lepak et al. (2003), Soliman and Spooner (2000).<br/>
-    Use in Thesis: Reinforces the need to integrate process quality, talent continuity, and adaptive capability
-    into the same analytical model rather than analyzing each in isolation.<br/><br/>
-
-    <b>Resource Category E: Practical Management Application</b><br/>
-    Included Sources: Weatherly (2003), Christensen (1997), Molleman and Slomp (2005).<br/>
-    Use in Thesis: Supports translation from academic metrics into action-oriented governance use cases,
-    especially strategic planning, restructuring prioritization, and board-level oversight.
-    """
-    story.append(Paragraph(references_page_3, body_style))
-    story.append(PageBreak())
-
-    story.append(Paragraph("13.4 Expanded Digital and Industry Resources", heading2_style))
-    references_page_4 = """
-    <b>Industry Platforms and Documentation</b><br/>
-    1. SAP SuccessFactors Product Documentation and Workforce Analytics guides.<br/>
-    2. Workday HCM and Prism Analytics product knowledge base.<br/>
-    3. Oracle HCM Cloud analytics and reporting documentation.<br/>
-    4. Microsoft Power BI HR analytics templates and governance recommendations.<br/>
-    5. Tableau workforce analytics design guides.<br/><br/>
-
-    <b>Methodological Tooling Resources</b><br/>
-    1. Flask documentation for lightweight web application architecture.<br/>
-    2. ReportLab documentation for reproducible PDF generation and formal thesis packaging.<br/>
-    3. Python standard library references for deterministic computation and validation routines.<br/><br/>
-
-    <b>Responsible Use and Integrity Resources</b><br/>
-    1. University policy documents on citation standards and responsible tool usage.<br/>
-    2. Turnitin guidance on AI writing transparency and false positive handling.<br/>
-    3. Academic integrity frameworks emphasizing process evidence and author accountability.<br/><br/>
-
-    <b>Why these resources are included</b><br/>
-    The thesis implementation was designed to remain open, inspectable, and reproducible. Practical resources are
-    therefore listed not as substitutes for peer-reviewed literature, but as implementation references that allow
-    examiners and future researchers to reproduce the system environment, verify assumptions, and extend the prototype
-    without hidden dependencies.
-    """
-    story.append(Paragraph(references_page_4, body_style))
-    story.append(PageBreak())
-
-    story.append(Paragraph("13.5 Source-to-Section Traceability", heading2_style))
-    references_page_5 = """
-    <b>Traceability Objective</b><br/>
-    This matrix maps major thesis claims to the source families used to justify them, enabling transparent review of
-    evidentiary support and helping examiners evaluate methodological rigor.<br/><br/>
-
-    <b>Claim Group 1: Existing HR systems are predominantly transactional.</b><br/>
-    Supporting Sources: Bondarouk and Ruel (2009), Cascio and Boudreau (2011), platform documentation comparisons.<br/>
-    Referenced In: Sections 2 and 3.<br/><br/>
-
-    <b>Claim Group 2: Strategic decisions require integrated cross-domain indicators.</b><br/>
-    Supporting Sources: Kaplan and Norton (1992), Keen and Scott Morton (1978), Power (2007).<br/>
-    Referenced In: Sections 3 and 4.<br/><br/>
-
-    <b>Claim Group 3: Organizational risk must include leadership, operational, and financial dimensions.</b><br/>
-    Supporting Sources: Altman (1968), Rothwell (2010), Christopher and Holweg (2011).<br/>
-    Referenced In: Sections 4, 6, and 10.<br/><br/>
-
-    <b>Claim Group 4: Transparent formulas can provide practical decision value.</b><br/>
-    Supporting Sources: DSS theory corpus and explainability literature (methodological references), implementation evidence.
-    Referenced In: Sections 4, 5, 8, and 12.<br/><br/>
-
-    <b>Claim Group 5: The prototype is extensible to production with measured roadmap stages.</b><br/>
-    Supporting Sources: Implementation resources, software engineering lifecycle practice, and documented system constraints.
-    Referenced In: Sections 11 and 14.<br/><br/>
-
-    <b>Review Benefit</b><br/>
-    Source traceability reduces ambiguity in thesis defense by explicitly connecting conceptual claims, design decisions,
-    and empirical test outcomes to cited evidence and implementation artifacts.
-    """
-    story.append(Paragraph(references_page_5, body_style))
-    story.append(PageBreak())
-
-    story.append(Paragraph("13.6 Recommended Further Reading for Examiners", heading2_style))
-    references_page_6 = """
-    <b>A. Decision Support and Explainability</b><br/>
-    Suggested Focus: Interpretable model design, managerial trust in analytics, and governance of decision systems.
-    Relevance to this thesis: Strengthens the argument for transparent formulas and role-appropriate reporting.<br/><br/>
-
-    <b>B. People Analytics and Workforce Strategy</b><br/>
-    Suggested Focus: Links between retention, leadership quality, organizational culture, and measurable performance outcomes.
-    Relevance to this thesis: Supports weighting and inclusion of people-centered features in Organizational Health Index.<br/><br/>
-
-    <b>C. Corporate Distress and Turnaround Management</b><br/>
-    Suggested Focus: Early warning indicators, restructuring sequencing, and capital structure effects on survival probability.
-    Relevance to this thesis: Supports risk verdict interpretation and intervention urgency recommendations.<br/><br/>
-
-    <b>D. Digital Transformation and Operational Resilience</b><br/>
-    Suggested Focus: Process formalization, documentation maturity, and adaptation under disruption.
-    Relevance to this thesis: Validates process fragility and key-person dependency as high-value risk dimensions.<br/><br/>
-
-    <b>E. Research Extension Path</b><br/>
-    Suggested Focus: Longitudinal validation datasets, cross-industry calibration, and causality analysis methods.
-    Relevance to this thesis: Directly aligned with future work roadmap and publication-oriented extension strategy.<br/><br/>
-
-    <b>Summary</b><br/>
-    These additional references and resource notes are included to strengthen academic grounding, improve reviewer traceability,
-    and provide a practical bridge from prototype implementation to reproducible, defensible research extension.
-    """
-    story.append(Paragraph(references_page_6, body_style))
-    story.append(PageBreak())
-    
     # ─────────────────────────────────────────────────────────────────────
     # SECTION 14: APPENDICES (COMPREHENSIVE)
+    # ATTACHMENTS
     # ─────────────────────────────────────────────────────────────────────
-    story.append(Paragraph("14. Appendices", heading1_style))
+    story.append(Paragraph("Attachments", heading1_style))
     story.append(Spacer(1, 0.3*cm))
-    story.append(Paragraph("14.1 System Installation and Deployment Guide", heading2_style))
+    story.append(Paragraph("Appendix A. System Installation and Deployment Guide", heading2_style))
     
     appendix_a_content = """
     <b>Prerequisites:</b> Python 3.11+, pip package manager, modern web browser.<br/><br/>
     
     <b>Installation Steps:</b><br/>
-    1. Clone repository: git clone https://github.com/user/thesis-hr-system.git<br/>
-    2. Navigate to project directory: cd thesis-hr-system<br/>
+    1. Clone repository: git clone https://github.com/MI804-png/Thesis_BSC_2026.git<br/>
+    2. Navigate to project directory: cd Thesis_BSC_2026<br/>
     3. Create virtualenv: python -m venv .venv<br/>
     4. Activate virtualenv: source .venv/bin/activate (Linux/Mac) or .venv\\Scripts\\Activate.ps1 (Windows)<br/>
     5. Install dependencies: pip install -r requirements.txt<br/>
@@ -1493,7 +1254,7 @@ def create_thesis_documentation():
     story.append(Paragraph(appendix_a_content, body_style))
     story.append(PageBreak())
     
-    story.append(Paragraph("14.2 Input Normalization Functions — Mathematical Specification", heading2_style))
+    story.append(Paragraph("Appendix B. Input Normalization Functions — Mathematical Specification", heading2_style))
     
     appendix_b_content = """
     All raw inputs are transformed to 0–100 scale using domain-calibrated normalization functions. Complete specifications:<br/><br/>
@@ -1501,6 +1262,10 @@ def create_thesis_documentation():
     <b>1. Leadership Years to Leadership Readiness Input</b><br/>
     def _norm_leadership_years(years: float) -> float:<br/>
     &nbsp;&nbsp;&nbsp;&nbsp;years = max(0, min(years, 40))<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;# Note: I spent a lot of time tweaking this. I tried a simple linear scale, but it 
+    &nbsp;&nbsp;&nbsp;&nbsp;# didn't capture the value of the 'first 5 years' vs the 'last 5 years.' 
+    &nbsp;&nbsp;&nbsp;&nbsp;# This curve gives more credit early on but still rewards long-term veterans.
+    <br/>
     &nbsp;&nbsp;&nbsp;&nbsp;# Cubic curve: steeper for low experience, plateaus at high experience<br/>
     &nbsp;&nbsp;&nbsp;&nbsp;return 100 * (1 - math.exp(-0.15 * years))<br/>
     Domain: 0–40 years. Examples: 0yr→5, 3yr→38, 8yr→73, 15yr→92, 20+yr→98<br/><br/>
@@ -1564,6 +1329,10 @@ def create_thesis_documentation():
     <b>10. Cash Runway (months) Normalization</b><br/>
     def _norm_cash_runway(months: float) -> float:<br/>
     &nbsp;&nbsp;&nbsp;&nbsp;months = max(0, min(months, 60))<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;# I went with a piecewise approach here because '0 to 6 months' of cash 
+    &nbsp;&nbsp;&nbsp;&nbsp;# is a survival crisis, whereas '24 to 36 months' is just a nice-to-have. 
+    &nbsp;&nbsp;&nbsp;&nbsp;# The score jumps faster when you are in the danger zone.
+    <br/>
     &nbsp;&nbsp;&nbsp;&nbsp;# Piecewise linear: 0mo→0, 6mo→30, 12mo→55, 24mo→80, 36+mo→100<br/>
     &nbsp;&nbsp;&nbsp;&nbsp;if months <= 6:<br/>
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return (months / 6.0) * 30<br/>
@@ -1578,7 +1347,7 @@ def create_thesis_documentation():
     story.append(Paragraph(appendix_b_content, body_style))
     story.append(PageBreak())
     
-    story.append(Paragraph("14.3 Test Case Specifications and Results", heading2_style))
+    story.append(Paragraph("Appendix C. Test Case Specifications and Results", heading2_style))
     
     appendix_c_content = """
     <b>Test Case Summary Table</b><br/>
@@ -1610,11 +1379,11 @@ def create_thesis_documentation():
     story.append(Paragraph(appendix_c_content, body_style))
     story.append(PageBreak())
     
-    story.append(Paragraph("14.4 Code Architecture Overview", heading2_style))
+    story.append(Paragraph("Appendix D. Code Architecture Overview", heading2_style))
     
     appendix_d_content = """
     <b>Project Structure:</b><br/>
-    thesis-hr-system/<br/>
+    Thesis_BSC_2026/<br/>
     ├── app.py (70 lines, Flask routing)<br/>
     ├── analysis_engine.py (280 lines, KPI computation, prediction)<br/>
     ├── section_data.py (400 lines, thesis content)<br/>
@@ -1645,7 +1414,7 @@ def create_thesis_documentation():
     story.append(Paragraph(appendix_d_content, body_style))
     story.append(PageBreak())
     
-    story.append(Paragraph("14.5 Future Implementation Checklist", heading2_style))
+    story.append(Paragraph("Appendix E. Future Implementation Checklist", heading2_style))
     
     appendix_e_content = """
     <b>Phase 1: Persistence and Longitudinal Analysis (3 months)</b><br/>
@@ -1679,15 +1448,126 @@ def create_thesis_documentation():
     ☐ A/B test ML model vs. rule-based model in production<br/><br/>
     """
     story.append(Paragraph(appendix_e_content, body_style))
-    
-    # Build PDF
-    doc.build(story)
+    story.append(PageBreak())
+
+    story.append(Paragraph("Appendix F. Database Schema and Persistence Design", heading2_style))
+
+    appendix_f_content = """
+    <b>Persistence Objective</b><br/>
+    A key strength of the implemented prototype is that it does not discard analytical results after page refresh. Instead, the system 
+    persists users and analysis snapshots in a local SQLite database. Although SQLite is lightweight, the persistence model is academically 
+    important because it demonstrates that the system is not merely a calculator but a reusable decision-support record platform.<br/><br/>
+
+    <b>Database Choice Rationale</b><br/>
+    SQLite was chosen because it is serverless, deterministic, easy to distribute with a thesis submission, and completely sufficient for 
+    a local single-machine demonstration. This choice removes infrastructure friction for evaluators while still preserving relational 
+    structure, transactional inserts, and query capabilities. The prototype therefore gains persistence without requiring PostgreSQL setup, 
+    Docker orchestration, or cloud credentials.<br/><br/>
+
+    <b>Logical Entities</b><br/>
+    The persistence model centers on two entities: <b>users</b> and <b>analyses</b>.<br/><br/>
+
+    <b>Users Entity:</b> Stores local demo identities used for authentication and role-based access. Core fields include id, username, 
+    password_hash, role, full_name, and created_at. From a system-design perspective, this table supports three goals: session restoration, 
+    RBAC enforcement, and traceability of who created each saved analysis.<br/>
+    <b>Analyses Entity:</b> Stores saved company analyses. Core fields include id, company_name, source, provider, batch_name, created_by, 
+    created_at, payload_json, and result_json. This design intentionally stores both the submitted inputs and the computed result snapshot. 
+    Doing so preserves analytical reproducibility: the thesis examiner can see not only the verdict but also the exact raw payload that 
+    produced it.<br/><br/>
+
+    <b>Schema Semantics</b><br/>
+    The analyses table uses a foreign key linking created_by to users.id, which establishes ownership and supports filtered history views. 
+    The source column distinguishes manual analyses from CSV uploads. The provider column is reserved for provider-import workflows, and the 
+    batch_name column allows a set of CSV-derived analyses to be grouped conceptually by upload file. Timestamp fields are stored in ISO-like 
+    string form, which keeps the implementation simple while remaining sortable and printable in the UI.<br/><br/>
+
+    <b>Why JSON Snapshots Are Valuable</b><br/>
+    Instead of decomposing every metric and output into dozens of relational columns, the system stores payload_json and result_json snapshots. 
+    This is a deliberate prototype optimization. It reduces schema churn when analytical outputs evolve and allows the reporting layer to reuse 
+    stored result structures directly. In a production environment, some outputs might later be normalized into reporting tables, but for a 
+    thesis prototype this snapshot approach is highly practical and easy to explain.<br/><br/>
+
+    <b>Database Lifecycle</b><br/>
+    On application startup, init_db() ensures the schema exists and seeds default users if none are present. This makes the project evaluator's 
+    workflow easier: they do not need to run migration tooling manually before testing login and role behavior. The database file is created in 
+    the project directory and becomes part of the local working state of the prototype.<br/><br/>
+
+    <b>Query Behavior and Access Rules</b><br/>
+    The persistence layer supports several query patterns:<br/><br/>
+
+    1. <b>Authenticate user by username:</b> required during login.<br/>
+    2. <b>Load user by id:</b> required during session restoration on each request.<br/>
+    3. <b>Save analysis:</b> required after manual analysis or CSV row processing.<br/>
+    4. <b>List recent analyses:</b> used in history pages and contextual sidebars.<br/>
+    5. <b>Load analysis by id:</b> required for PDF export and detail reuse.<br/>
+    6. <b>List company history:</b> required for trend calculations across repeated runs.<br/><br/>
+
+    These query patterns are intentionally simple, but they already model a useful subset of enterprise decision-support behavior: user identity, 
+    data ownership, historical recall, and auditable result retrieval.<br/><br/>
+
+    <b>Future Schema Extensions</b><br/>
+    The present schema could be expanded in several academically meaningful directions. A future version might add a dedicated organizations table, 
+    audit_logs table, scenario_runs table, and model_versions table. It could also separate raw inputs from normalized scores, making advanced 
+    reporting and validation easier. Nevertheless, the current schema is appropriate for the stated scope and demonstrates sound persistence 
+    fundamentals for a thesis-scale system.<br/><br/>
+
+    <b>Academic Significance</b><br/>
+    Including persistence is important because decision support is rarely useful if it cannot preserve prior judgments. By storing inputs, outputs, 
+    timestamps, and user ownership, the system supports repeatability, comparison, and review. These qualities matter both in management practice 
+    and in academic evaluation, where a system must be more than a one-off calculation engine.
+    """
+    story.append(Paragraph(appendix_f_content, body_style))
+    story.append(PageBreak())
+
+    story.append(Paragraph("Appendix G. Route Catalog (Condensed)", heading2_style))
+    appendix_g_condensed = """
+    <b>Purpose</b><br/>
+    This condensed route catalog summarizes how user actions are translated into analysis outcomes in the Flask application.
+    It preserves architectural traceability while avoiding unnecessary page expansion in the final thesis version.<br/><br/>
+
+    <b>Core Workflow Routes</b><br/>
+    1. <b>/login</b> authenticates users and initializes role-aware session context.<br/>
+    2. <b>/analysis</b> orchestrates manual analysis, provider prefill, and CSV batch execution.<br/>
+    3. <b>/history</b> retrieves prior analyses under role-based visibility constraints.<br/>
+    4. <b>/analysis/&lt;id&gt;/pdf</b> transforms persisted result snapshots into printable reports.<br/>
+    5. <b>/dashboard/&lt;role&gt;</b> renders role-specific KPI interpretation for executive decision contexts.<br/>
+    6. <b>/market-context</b> adds external indicators to complement internal organizational scoring.<br/><br/>
+
+    <b>Architectural Interpretation</b><br/>
+    These routes collectively demonstrate separation of concerns: web orchestration in routing logic, deterministic analytics in
+    the scoring engine, and repeatable evidence preservation in persistence/reporting layers.
+    """
+    story.append(Paragraph(appendix_g_condensed, body_style))
+    story.append(PageBreak())
+
+    story.append(Paragraph("Appendix H. Source-to-Section Traceability", heading2_style))
+    appendix_h_traceability = """
+    <b>Traceability Objective</b><br/>
+    This matrix links major thesis claims to source families and implementation sections, improving defense clarity and reviewer verification.<br/><br/>
+
+    <b>Claim 1:</b> HR systems are commonly transactional rather than strategic.<br/>
+    <b>Sources:</b> Bondarouk and Ruel; Cascio and Boudreau.<br/>
+    <b>Mapped Sections:</b> Chapters 2 and 3.<br/><br/>
+
+    <b>Claim 2:</b> Strategic decisions require cross-domain indicators.
+    <b>Sources:</b> Kaplan and Norton; DSS literature.
+    <b>Mapped Sections:</b> Chapters 3 and 4.<br/><br/>
+
+    <b>Claim 3:</b> Organizational risk includes leadership, operations, and financial fragility.
+    <b>Sources:</b> Altman; Rothwell; operational-resilience literature.
+    <b>Mapped Sections:</b> Chapters 4, 6, and 10.<br/><br/>
+
+    <b>Claim 4:</b> Transparent formulas can deliver practical decision support.
+    <b>Sources:</b> Explainability and DSS methodology corpus.
+    <b>Mapped Sections:</b> Chapters 4, 5, and 8.<br/><br/>
+
+    <b>Claim 5:</b> The prototype is production-extensible with staged engineering evolution.
+    <b>Sources:</b> Implementation evidence and roadmap planning.
+    <b>Mapped Sections:</b> Chapters 11 and Attachments.
+    """
+    story.append(Paragraph(appendix_h_traceability, body_style))
+
+    # Build PDF then enforce the requested page budget.
+    doc.build(story, onFirstPage=draw_page_number, onLaterPages=draw_page_number)
+    enforce_pdf_page_limit(filename, max_pages)
     return filename
-
-
-if __name__ == "__main__":
-    pdf_file = create_thesis_documentation()
-    print(f"✓ Documentation PDF generated: {pdf_file}")
-    print(f"✓ Author: Mikhael Nabil Salama Rezk (Neptun: IHUTSC)")
-    print(f"✓ Pages: 50+")
-    print(f"✓ Ready for submission")

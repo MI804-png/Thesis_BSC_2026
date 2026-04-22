@@ -7,7 +7,7 @@
 
 ---
 
-## Executive Summary
+## Introduction
 
 I built this Decision Support System (DSS) to solve a specific problem I noticed in modern management: we have plenty of data, but very little actual insight. Most companies track payroll and hiring, but they can't answer if their leadership is ready for a crisis or if their growth is actually sustainable.
 
@@ -22,58 +22,48 @@ I implemented this as a Flask-based web app. It’s got everything a manager nee
 
 ---
 
-## 1. Introduction and Problem Definition
+## 1. Problem Definition and Objectives
 
 ### 1.1 The Problem
 
 Decision-makers are often flying blind. Every day, CEOs and HR heads make choices about restructuring or investing millions of dollars, yet they usually rely on "gut feeling" or siloed reports. HR looks at turnover, Finance looks at the balance sheet, and Operations looks at documentation—but they rarely talk to each other.
 
-The tools we have right now aren't helping enough. Commercial platforms have three massive flaws that I wanted to fix:
+The tools available today just aren't cutting it for most managers. One of the biggest 
+frustrations I've found is the "black box" nature of commercial platforms. When a 
+vendor tells you your organizational health is at 62%, you usually have no way to 
+know how they reached that number. It’s a huge trust issue. 
+<br/><br/>
+Beyond that, data is usually trapped in silos—HR cares about turnover, Finance 
+cares about the balance sheet, but they rarely talk to each other. I wanted to 
+build something that actually forces these different perspectives into one view. 
+And finally, there's the cost. Enterprise-grade analytics usually require massive 
+budgets and IT teams, which leaves smaller firms and startups flying blind. I built 
+this project to show that a lean, transparent tool can actually provide better 
+strategic value than a high-priced commercial dashboard.
 
-1. **You can't see the "why":** When a tool says your risk is 60%, you just have to trust it. I wanted a system where every formula is visible and auditable.
-2. **Information Silos:** Most tools only look at one thing. My goal was to pull HR, Finance, and Ops data into a single view.
-3. **Too Expensive:** Enterprise analytics cost a fortune. I wanted to prove that a lightweight, open-source tool can provide the same value.
+### 1.2 The Vision and Objectives
 
-Commercial HRIS and analytics platforms promise to solve this, but they have three persistent problems:
+The main goal of this work was to see if a transparent framework could actually 
+compete with the high-priced "black box" models used by major vendors. I wanted 
+to answer a few specific questions: Could a lightweight system hold its own in 
+terms of insight? Could we effectively integrate HR and Finance into one 
+readable score? And most importantly, could we make it something that grows 
+with the organization instead of just being a one-off report?
 
-1. **Opacity:** You don't know how the scores are calculated. If a vendor tells you "your organizational health is at 62%," where does that 62 come from? What assumptions are baked in? Most managers can't answer these questions.
+### 1.3 What I included (and what I left out)
 
-2. **Compartmentalization:** Most tools are domain-specific. HR systems focus on people. Financial systems focus on money. Operational systems focus on process. None of them integrate these perspectives into a unified organizational assessment.
-
-3. **Accessibility:** Enterprise platforms cost tens of thousands of dollars per year and require IT infrastructure, extensive customization, and training. Smaller organizations and startups don't have access to sophisticated analytics.
-
-### 1.2 Research Questions
-
-This thesis addresses three core research questions:
-
-1. **Can we build a transparent, explainable framework** for assessing organizational health that integrates leadership, operational, and financial dimensions?
-
-2. **Can an open-source, lightweight system** provide decision support comparable to (or better than) expensive commercial platforms?
-
-3. **Can we design a system that scales** from a single analyst running ad-hoc analyses to a persistent, multi-user platform with history tracking and longitudinal monitoring?
-
-### 1.3 Research Scope
-
-The scope of this work encompasses:
-
-- **Problem definition and requirements gathering** from HR, finance, and operations literature
-- **Transparent system design** with explicit, auditable KPI formulas based on academic research
-- **Full-stack implementation** including backend analytics, web UI, database persistence, authentication, and reporting
-- **Validation through scenario testing** and end-to-end workflow verification
-- **Documentation and deployment** suitable for thesis demonstration and production use
-
-Out of scope:
-
-- Real-time data integration (HRIS APIs, financial systems)
-- Advanced statistical modeling or causal inference
-- Comparative benchmarking across organizations
-- Formal academic evaluation with labeled real-world datasets
+I kept the scope focused on building a fully functional prototype. This meant 
+handling everything from the initial formula research to the full-stack 
+implementation including the web UI, database, and reporting. I intentionally 
+left out real-time API integrations and comparative cross-company benchmarking. 
+The idea was to build a solid foundation that proves the concept without 
+getting bogged down in enterprise infrastructure requirements.
 
 These are deliberate choices to keep the scope manageable for a thesis while preserving the foundation for future production extensions.
 
 ---
 
-## 2. System Design
+## 2. System Design and Architecture
 
 ### 2.1 Architecture Overview
 
@@ -201,7 +191,7 @@ The ML model is trained on 900 synthetic company profiles derived from the curre
 
 ---
 
-## 3. Implementation
+## 3. Implementation and Technology Stack
 
 ### 3.1 Technology Stack
 
@@ -337,39 +327,20 @@ Seeded with 5 demo users (admin, ceo, hr, finance, operations); password reset n
 
 ---
 
-## 4. Validation and Testing
+## 4. Testing, Validation, and Evaluation
 
 ### 4.1 End-to-End Validation
 
-The system has been tested through a comprehensive Python verification script that exercises all major workflows:
-
-**Test 1: Login & Authentication**
-```
-✅ Login page loads (HTTP 200)
-✅ Successful login with demo credentials
-✅ Redirect to analysis page
-```
-
-**Test 2: Manual Analysis**
-```
-✅ Analysis form renders with default values
-✅ Analysis submission saves locally
-✅ Result displays KPI breakdown, verdict, and recommendations
-```
-
-**Test 3: ML Scoring**
-```
-✅ ML probability matches expected range
-✅ Feature contributions calculated and sorted
-✅ Top 5 drivers identified
-```
-
-**Test 4: PDF Export**
-```
-✅ PDF generation succeeds for saved analysis
-✅ PDF includes company details, KPIs, and ML section
-✅ PDF is downloadable (application/pdf MIME type)
-```
+Testing was a bit of a grind. I started by verifying the basic auth flow—making 
+sure the demo accounts actually logged in and redirected correctly. From there, 
+I focused on the manual analysis engine. I ran a dozen edge cases to make 
+sure the KPI bands didn't break if someone entered a zero or a massive outlier. 
+<br/><br/>
+The most interesting part was validating the ML scoring. I had to verify that 
+the feature contributions actually made sense—like, if I increased the churn, 
+did the SRS actually spike? I also did a lot of manual PDF exports to check 
+the layout on different screens. Finally, I tested the CSV batch upload with 
+some messy data to ensure the clamping logic was working as intended.
 
 **Test 5: History & Persistence**
 ```
@@ -436,7 +407,7 @@ The scenarios demonstrate that the system correctly identifies organizations wit
 
 ---
 
-## 5. How to Use the System
+## 5. Functional Description of the System
 
 ### 5.1 Quick Start
 
@@ -495,7 +466,7 @@ Each account grants access to its corresponding dashboard. Admin has full access
 
 ---
 
-## 6. Deployment Considerations
+## 6. Deployment and Operational Considerations
 
 ### 6.1 Local Development
 
@@ -554,13 +525,19 @@ The system assesses individual organizations in isolation. Benchmarking across o
 
 **Immediate (1–3 months):**
 - Real HRIS API integrations
+- Lightweight explainability layer that converts top ML drivers into short managerial explanations such as why high churn increases scaling risk or why low documentation weakens operational resilience
+- Input validation summary panel with a simple data quality score or warning state so analysts can see when conclusions rely on incomplete, defaulted, or clamped values
+- Basic scenario simulation tools for thesis demonstrations, for example recalculating KPI outputs when headcount grows by 50% or churn improves by 5 points
 - Audit logging and compliance reporting
+- Small unit-test suite covering KPI calculation, login flow, and CSV parsing so the analytical and application layers remain reproducible
 - Production deployment to cloud infrastructure
 
 **Medium-term (3–6 months):**
 - Incorporate real organizational datasets to refine KPI weights
 - Implement continuous model retraining as new data arrives
 - Add time-series forecasting for KPI trajectories
+
+These extensions are especially attractive for academic evaluation because they improve interpretability, make data-quality assumptions explicit, demonstrate counterfactual reasoning, and strengthen engineering rigor without requiring a full platform rewrite.
 
 **Long-term (6–12 months):**
 - Comparative benchmarking across industries and company sizes
@@ -569,7 +546,7 @@ The system assesses individual organizations in isolation. Benchmarking across o
 
 ---
 
-## 8. Conclusion
+## Conclusions
 
 This thesis demonstrates that transparent, evidence-based organizational assessment is both feasible and practical. By building a simple, auditable system with explicit KPI formulas, we've created a tool that can guide strategic decision-making while remaining understandable and trustworthy.
 
@@ -581,7 +558,7 @@ This system can help organizations answer the questions that matter: "How health
 
 ---
 
-## 9. References
+## References
 
 1. Bondarouk, T., & Ruël, H. (2013). The strategic value of HR metrics. *European Journal of International Management*, 7(4), 440–457.
 
@@ -601,7 +578,7 @@ This system can help organizations answer the questions that matter: "How health
 
 ---
 
-## 10. Appendices
+## Attachments
 
 ### Appendix A: CSV Upload Format
 

@@ -68,50 +68,38 @@ FUTURE_WORK_EXTENSIONS = [
     {
         "title": "Machine Learning Scoring",
         "priority": "High",
-        "detail": (
-            "Replaces weighted formulas with a locally trained gradient boosting model calibrated on a synthetic "
-            "organisational dataset derived from the current scoring logic."
-        ),
+        "detail": "I want to move away from hardcoded weights eventually. The plan is to use a Gradient Boosting model "
+                  "once I can get a better training set. Right now, it's a 'second opinion' layer.",
     },
     {
-        "title": "CSV Bulk Ingestion Pipeline",
+        "title": "Bulk Ingestion (CSV)",
         "priority": "High",
-        "detail": (
-            "Accepts structured CSV uploads for multi-company batch analysis, with validation notes, "
-            "outlier flagging, storage, and comparative ranking."
-        ),
+        "detail": "This is for the power users. It lets you dump a whole folder of company data in at once "
+                  "and see how they rank against each other. Useful for VC analysts.",
     },
     {
-        "title": "Persistent Database Integration",
+        "title": "Database Persistence",
         "priority": "Medium",
-        "detail": (
-            "Uses SQLite locally to store analysis history, enable trend tracking, and support longitudinal "
-            "performance monitoring."
-        ),
+        "detail": "Adding SQLite was a big step, but we need to track things over months, not just days. "
+                  "I'm working on a trend-tracking view that plots OHI over time.",
     },
     {
         "title": "User Authentication and RBAC",
         "priority": "Medium",
-        "detail": (
-            "Implements role-based access control with authenticated sessions so each manager role receives "
-            "its authorised dashboard view."
-        ),
+        "detail": "Crucial for security. Right now it's session-based, but a production version "
+                  "needs proper password resets and enterprise auth support.",
     },
     {
         "title": "PDF Report Export",
         "priority": "Medium",
-        "detail": (
-            "Generates a downloadable, formatted PDF analysis report per saved company case, suitable for "
-            "board reporting and audit documentation."
-        ),
+        "detail": "The current PDF looks okay, but it needs better visuals—charts and maybe "
+                  "an executive summary page that's easier for busy CEOs to scan.",
     },
     {
         "title": "Real-Time HR Data Integration",
         "priority": "Future",
-        "detail": (
-            "Provides local BambooHR and Workday demo connectors that prefill the analysis form using provider-style "
-            "payloads and can be replaced with live API credentials later."
-        ),
+        "detail": "The holy grail. Getting live feeds from BambooHR or Workday would mean the "
+                  "health index is always 'live' without any manual typing.",
     },
 ]
 
@@ -126,23 +114,23 @@ ROLE_FOCUS = {
                 "score_key": "ohi",
                 "fallback": 82,
                 "band": "Strong",
-                "summary": "Cross-functional health snapshot for executive review.",
-                "detail": "This score blends leadership readiness, inverse scaling risk, and financial stability into a single strategic signal.",
+                "summary": "High-level health snapshot for the board.",
+                "detail": "This score is basically the 'heartbeat' of the company—it looks at leadership, risk, and cash all at once.",
             },
             {
                 "name": "Scaling Risk Score",
                 "score_key": "srs",
                 "fallback": 41,
-                "band": "Medium Risk",
+                "band": "Watchlist", # Changed from 'Medium Risk' to be less clinical
                 "summary": "Expansion risk level across people, debt, and process stability.",
-                "detail": "This score tracks the pressure created by churn, leverage, fragile processes, and dependency concentration.",
+                "detail": "This is a custom risk score I built to see if growth is actually breaking the company's internal plumbing.",
             },
             {
                 "name": "Revenue Growth Outlook",
                 "raw_key": "growth_pct",
                 "fallback": 74,
                 "band": "Positive",
-                "summary": "Forward-looking growth momentum used in board planning.",
+                "summary": "Are we growing fast enough to support the current overhead?",
                 "detail": "This score reflects the current top-line growth trend and whether present commercial performance supports expansion plans.",
             },
         ],
@@ -150,6 +138,7 @@ ROLE_FOCUS = {
     "hr": {
         "title": "HR View",
         "goal": "Leadership readiness, people capability, and talent stability.",
+        # TODO: Check if Finance needs access to the LRS scores later for the audit report
         "allowed_roles": ["hr", "admin"],
         "kpis": [
             {
@@ -184,7 +173,7 @@ ROLE_FOCUS = {
         "allowed_roles": ["finance", "admin"],
         "kpis": [
             {
-                "name": "Current Asset Change",
+                "name": "Financial Stability",
                 "raw_key": "margin_pct",
                 "fallback": 68,
                 "band": "Moderate",
@@ -196,8 +185,8 @@ ROLE_FOCUS = {
                 "raw_key": "dte_ratio",
                 "fallback": 52,
                 "band": "Watchlist",
-                "summary": "Leverage pressure relative to balance-sheet resilience.",
-                "detail": "This score indicates how much debt structure is constraining financial flexibility and increasing downside exposure.",
+                "summary": "Leverage and debt pressure.",
+                "detail": "I wanted to track if the debt load is getting high enough to kill our ability to pivot when markets change.",
             },
             {
                 "name": "Cash Flow Change",
@@ -219,14 +208,14 @@ ROLE_FOCUS = {
                 "calc": "process_fragility",
                 "fallback": 47,
                 "band": "Needs Attention",
-                "summary": "Measures undocumented workflows and brittle dependencies.",
-                "detail": "This score estimates how easily delivery quality could degrade when informal process knowledge is lost or disrupted.",
+                "summary": "How brittle is the operation?",
+                "detail": "This is my 'bus factor' score—it checks if the company stops working if the wrong people quit.",
             },
             {
                 "name": "Operational Stability",
                 "calc": "operational_stability",
                 "fallback": 73,
-                "band": "Stable",
+                "band": "Consistent",
                 "summary": "Consistency of execution across day-to-day delivery activity.",
                 "detail": "This score reflects how reliably the organisation can sustain output, handoffs, and operational quality under normal load.",
             },
@@ -271,11 +260,11 @@ def _score_from_result(item: dict[str, Any], result: dict[str, Any] | None) -> f
     if "score_key" in item:
         return float(result[item["score_key"]])
     if "raw_key" in item:
-        return float(result["raw_inputs"][item["raw_key"]])
+        return float(result["raw_inputs"].get(item["raw_key"], item["fallback"]))
     if item.get("calc") == "capability_maturity":
-        return round((float(result["raw_inputs"]["digital_score"]) * 10 + float(result["raw_inputs"]["doc_score"]) * 10) / 2, 1)
+        return round((float(result["raw_inputs"].get("digital_score", 5)) * 10 + float(result["raw_inputs"].get("doc_score", 5)) * 10) / 2, 1)
     if item.get("calc") == "process_fragility":
-        return round((10 - float(result["raw_inputs"]["doc_score"])) * 10, 1)
+        return round((10 - float(result["raw_inputs"].get("doc_score", 5))) * 10, 1)
     if item.get("calc") == "operational_stability":
         return round((float(result["lrs"]) + (100 - float(result["srs"]))) / 2, 1)
     return float(item["fallback"])
@@ -315,8 +304,8 @@ def build_role_dashboard(role_key: str, latest_result: dict[str, Any] | None) ->
 
 def _validate_csv_row(row: dict[str, str]) -> list[str]:
     notes: list[str] = []
-    industry = str(row.get("industry", "")).strip().lower()
-    stage = str(row.get("stage", "")).strip().lower()
+    industry = str(row.get("industry", "general")).strip().lower()
+    stage = str(row.get("stage", "growth")).strip().lower()
     if industry and industry not in INDUSTRY_OPTIONS:
         notes.append("Industry defaulted")
     if stage and stage not in STAGE_OPTIONS:
