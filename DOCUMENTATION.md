@@ -939,6 +939,14 @@ export FLASK_DEBUG="1"
 
 ---
 
+## AI Assistance Disclosure
+
+- 30% AI assistance (mainly editing, polishing, and structuring).
+
+## GitHub Repository
+
+- Repository: https://github.com/MI804-png/Thesis_BSC_2026
+
 **End of Documentation**
 
 For more details, see:

@@ -86,11 +86,11 @@ Recommended content for your introduction:
 - Scope and limitations of the project
 - Short overview of the implemented system
 
-### Main Numbered Chapters
+### Main Numbered Chapters (Maximum 6)
 
-This is the best mapping of your thesis content into the template structure.
+This is the best mapping of your thesis content into the template structure while keeping a strict maximum of 6 main chapters.
 
-#### 1. Introduction and Problem Definition
+#### 1. Problem Definition and Thesis Objectives
 
 Suggested subsections:
 
@@ -111,7 +111,7 @@ Suggested subsections:
 - 2.5 Commercial Tools and Their Limitations
 - 2.6 Research Gap
 
-#### 3. System Design and Architecture
+#### 3. System Design and Methodology
 
 Suggested subsections:
 
@@ -123,7 +123,7 @@ Suggested subsections:
 - 3.6 Machine Learning Comparison Layer
 - 3.7 Security and Access Design
 
-#### 4. Implementation and Technology Stack
+#### 4. Implementation and Validation
 
 Suggested subsections:
 
@@ -137,7 +137,7 @@ Suggested subsections:
 - 4.8 Frontend Implementation
 - 4.9 Authentication and RBAC
 
-#### 5. Functional Description of the System
+#### 5. Formal Formatting Rules Applied in This Thesis
 
 Suggested subsections:
 
@@ -150,7 +150,7 @@ Suggested subsections:
 - 5.7 Market Context Page
 - 5.8 PDF Export
 
-#### 6. Testing, Validation, and Evaluation
+#### 6. Results, Evaluation, and Practical Use
 
 Suggested subsections:
 
@@ -161,26 +161,7 @@ Suggested subsections:
 - 6.5 Evaluation of Results
 - 6.6 Strengths and Weaknesses of the Prototype
 
-#### 7. Practical Use Cases
-
-Suggested subsections:
-
-- 7.1 Venture Capital Due Diligence
-- 7.2 Board-Level Strategic Planning
-- 7.3 Founder Self-Assessment
-- 7.4 Transformation Program Prioritization
-- 7.5 Academic and Research Use Cases
-
-#### 8. Limitations and Future Work
-
-Suggested subsections:
-
-- 8.1 Current Limitations
-- 8.2 Data Quality Constraints
-- 8.3 Future Explainability Improvements
-- 8.4 Scenario Simulation Extensions
-- 8.5 Logging and Governance Extensions
-- 8.6 Unit Testing and Engineering Hardening
+Practical use cases and future work should be kept as subsections under Chapter 6.
 
 ### Conclusions
 
@@ -253,14 +234,12 @@ When editing in Word, map your content like this:
 
 If you want the safest final structure for this project, use this exact chapter order:
 
-1. Introduction and Problem Definition
+1. Problem Definition and Thesis Objectives
 2. Literature Review and Related Work
-3. System Design and Architecture
-4. Implementation and Technology Stack
-5. Functional Description of the System
-6. Testing, Validation, and Evaluation
-7. Practical Use Cases
-8. Limitations and Future Work
+3. System Design and Methodology
+4. Implementation and Validation
+5. Formal Formatting Rules Applied in This Thesis
+6. Results, Evaluation, and Practical Use
 
 Then finish with:
 
@@ -287,7 +266,7 @@ These points were recovered directly from [FinalThesis_Template.docx](FinalThesi
 For your thesis, the most correct approach is:
 
 1. Keep the official Word front-matter order from the template.
-2. Put your actual thesis content into the 8 numbered chapters listed above.
+2. Put your actual thesis content into the 6 numbered chapters listed above.
 3. Keep `Introduction`, `Conclusions`, `References`, and `Attachments` unnumbered to match the template.
 4. Move detailed technical material into appendices instead of overcrowding the core chapters.
 

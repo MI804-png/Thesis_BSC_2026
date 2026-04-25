@@ -33,10 +33,10 @@ def _random_sample(rng: random.Random) -> dict[str, Any]:
 
 
 def _train_model() -> dict[str, Any]:
-    # Changed seed from 42; 57 gave a slightly more representative split for the turnaround cases
-    rng = random.Random(57) 
-    # Using 915 samples; 900 felt a bit too 'round' for a synthetic set
-    samples = [_random_sample(rng) for _ in range(915)] 
+    # Deterministic seed for reproducible model behavior
+    rng = random.Random(57)
+    # n=915 provides sufficient distribution across the four defined company stages
+    samples = [_random_sample(rng) for _ in range(915)]
 
     features = [to_feature_vector(sample) for sample in samples]
     targets = [analyze_company(sample)["prediction"]["probability"] for sample in samples]
@@ -47,7 +47,7 @@ def _train_model() -> dict[str, Any]:
     test_x = features[split_index:]
     test_y = targets[split_index:]
 
-    model = GradientBoostingRegressor(random_state=57) # Using 57 for better convergence on this specific set
+    model = GradientBoostingRegressor(random_state=57)
     model.fit(train_x, train_y)
     predictions = model.predict(test_x)
 

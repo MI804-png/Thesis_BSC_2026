@@ -16,8 +16,9 @@ Use this as the final Word-ready structure for your thesis.
 ## Table of Contents
 
 - Auto-generated from Word heading styles
+- Abstract
 
-## Introduction
+## 1. Introduction and Problem Definition
 
 - Background of the problem
 - Why HR, financial, and operational data are usually fragmented
@@ -25,97 +26,81 @@ Use this as the final Word-ready structure for your thesis.
 - Motivation for a transparent decision support system
 - Short description of the implemented prototype
 
-## 1. Problem Definition and Objectives
-
 ### 1.1 The Problem
 
 ### 1.2 The Vision and Objectives
 
 ### 1.3 Scope and Boundaries
 
-## 2. System Design and Architecture
+## 2. Literature Review and Related Work
 
-### 2.1 Architecture Overview
+### 2.1 HRIS and Decision Support Foundations
 
-### 2.2 Data Model and Input Dimensions
+### 2.2 People Analytics and Organizational Risk
 
-### 2.3 KPI Formulas and Weighting Logic
+### 2.3 Research Gap
 
-### 2.4 Rule-Based Prediction Logic
+### 2.4 Thesis Positioning
 
-### 2.5 Role-Based Dashboards
+## 3. System Design and Architecture
 
-### 2.6 Local Machine Learning Layer
+### 3.1 Architecture Overview
 
-## 3. Implementation and Technology Stack
+### 3.2 Data Model and Input Dimensions
 
-### 3.1 Technology Stack
+### 3.3 KPI Formulas and Weighting Logic
 
-### 3.2 Programming Languages Used
+### 3.4 Rule-Based Prediction Logic
 
-### 3.3 Core Modules
+### 3.5 Role-Based Dashboards
 
-### 3.4 Templates and Frontend Structure
+### 3.6 Local Machine Learning Layer
 
-### 3.5 Static Assets
+## 4. Implementation and System Development
 
-### 3.6 Database Schema
+### 4.1 Technology Stack
 
-### 3.7 Key Features Implemented
+### 4.2 Programming Languages Used
 
-## 4. Testing, Validation, and Evaluation
+### 4.3 Core Modules
 
-### 4.1 End-to-End Validation
+### 4.4 Templates and Frontend Structure
 
-### 4.2 Scenario Testing
+### 4.5 Static Assets
 
-### 4.3 Input Validation Review
+### 4.6 Database Schema
 
-### 4.4 Functional Testing of Login, CSV, History, and Dashboards
+### 4.7 Key Features Implemented
 
-## 5. Functional Description of the System
+## 5. Results, Evaluation, and Future Work
 
-### 5.1 Quick Start
+### 5.1 End-to-End Validation
 
-### 5.2 Login and User Roles
+### 5.2 Scenario Testing
 
-### 5.3 Run an Analysis
+### 5.3 Input Validation Review
 
-### 5.4 Batch Upload
+### 5.4 Functional Testing of Login, CSV, History, and Dashboards
 
-### 5.5 View History and Trends
+### 5.5 Main Results
 
-### 5.6 Role Dashboards
+### 5.6 Limitations
 
-### 5.7 Market Context Page
+### 5.7 Recommended Future Work
 
-### 5.8 PDF Export
+## Appendix: Formal Formatting Rules Applied in This Thesis
 
-## 6. Deployment and Operational Considerations
+### A.1 Body Text Rules
 
-### 6.1 Local Development
+### A.2 Heading and Numbering Rules
 
-### 6.2 Production Deployment
+### A.3 Figure Rules
 
-### 6.3 Monitoring and Logging
+### A.4 Table Rules
 
-### 6.4 Security Considerations
+### A.5 Formula and Source-Code Rules
 
-## 7. Limitations and Future Work
-
-### 7.1 Known Limitations
-
-### 7.2 Explainability Improvements
-
-### 7.3 Data Quality and Validation Summary Extensions
-
-### 7.4 Scenario Simulation Extensions
-
-### 7.5 Logging and Auditability
-
-### 7.6 Unit Testing and Engineering Hardening
-
-### 7.7 Recommended Future Work
+### A.6 Reference Rules and Order
 
 ## Conclusions
 

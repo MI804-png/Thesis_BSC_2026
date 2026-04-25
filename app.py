@@ -15,7 +15,7 @@ from analysis_engine import (
     NUMERIC_FIELD_SPECS,
     STAGE_OPTIONS,
     build_form_data,
-    run_ai_analysis,
+    run_decision_analysis,
 )
 from data_store import (
     DEFAULT_USERS,
@@ -439,7 +439,7 @@ def analysis():
             batch_name = uploaded.filename
             for index, row in enumerate(reader, start=2):
                 form_data = build_form_data(row)
-                result = run_ai_analysis(form_data)
+                result = run_decision_analysis(form_data)
                 result["ml_prediction"] = get_ml_prediction(form_data)
                 analysis_id = save_analysis(
                     created_by=g.user["id"],
@@ -475,7 +475,7 @@ def analysis():
             return render_template("analysis.html", **context)
 
         form_data = build_form_data(request.form)
-        result = run_ai_analysis(form_data)
+        result = run_decision_analysis(form_data)
         result["ml_prediction"] = get_ml_prediction(form_data)
         analysis_id = save_analysis(
             created_by=g.user["id"],

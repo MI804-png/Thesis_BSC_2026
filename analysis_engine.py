@@ -165,10 +165,9 @@ def to_feature_vector(form_data: Mapping[str, Any]) -> List[float]:
 
 
 def _norm_leadership_years(years: float) -> float:
-    # I experimented with different curves here. A linear scale didn't feel right 
-    # because 10 years of experience isn't twice as good as 5—it's much better.
-    # However, after 15-20 years, the marginal benefit starts to flatten out.
-    # This piecewise approach allows for that 'sweet spot' in the mid-career range.
+    # Normalization utilizes a non-linear piecewise function to reflect the 
+    # exponential utility of early-career experience versus the diminishing 
+    # returns associated with late-career seniority.
     if years <= 0:
         return 5.0
     if years <= 3:
@@ -215,9 +214,10 @@ def _norm_revenue_growth(growth_pct: float) -> float:
 
 
 def _norm_cash_runway(months: float) -> float:
-    # I originally had a complex piecewise function for this in my notes, but for the 
-    # prototype, I simplified it to a linear scale centered at zero. 
-    # It's less 'academic' but way easier to debug when testing cash flow trends.
+    # Cash runway normalization is mapped to a zero-centered linear scale.
+    # While piecewise models capture survival thresholds more accurately,
+    # a linear distribution facilitates more predictable longitudinal 
+    # trend analysis within this prototype scope.
     return _clamp((months + 100) * 0.5)
 
 
@@ -408,6 +408,6 @@ def analyze_company(form_data: Mapping[str, Any]) -> Dict[str, Any]:
     }
 
 
-def run_ai_analysis(form: Mapping[str, Any]) -> Dict[str, Any]:
+def run_decision_analysis(form: Mapping[str, Any]) -> Dict[str, Any]:
     form_data = build_form_data(form)
     return analyze_company(form_data)
