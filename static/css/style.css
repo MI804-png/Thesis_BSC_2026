@@ -469,6 +469,41 @@ nav a:hover {
     margin: 4px 0 10px;
 }
 
+.industry-select-form .grid.four {
+    gap: 10px;
+}
+
+.industry-radio-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fffdfa;
+    color: var(--text);
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+}
+
+.industry-radio-label input[type="radio"] {
+    accent-color: var(--primary);
+    margin: 0;
+    flex: 0 0 auto;
+}
+
+.industry-radio-label:hover {
+    border-color: var(--primary);
+}
+
+.industry-radio-label.is-selected {
+    border-color: var(--primary);
+    background: #edf8f6;
+    color: var(--text);
+}
+
 .split-head,
 .batch-meta,
 .dashboard-meta-bar {

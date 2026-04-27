@@ -10,7 +10,7 @@
     </p>
     <div class="api-sources-bar">
         <span class="api-badge">World Bank Open Data</span>
-        <span class="api-badge">Teleport Urban Areas</span>
+        <span class="api-badge">Open-Meteo City Signals</span>
         <span class="api-badge">Frankfurter Exchange Rates</span>
         <span class="api-badge">RandomUser API</span>
     </div>
@@ -42,19 +42,19 @@
     <!-- ── World Bank Economic Indicators ── -->
     <section class="panel market-panel">
         <p class="chip">
-            <a href="{{ world_bank.world_bank.indicators.gdp_growth.source_url }}"
-               target="_blank" rel="noopener noreferrer">{{ world_bank.world_bank.indicators.gdp_growth.source }}</a>
+                <a href="{{ world_bank.indicators.gdp_growth.source_url }}"
+                    target="_blank" rel="noopener noreferrer">{{ world_bank.indicators.gdp_growth.source }}</a>
         </p>
         <h2>Economic Indicators</h2>
         <p class="lead">Country: <strong>{{ world_bank.country }}</strong></p>
 
         {% for key, indicator in world_bank.indicators.items() %}
-        {% if not indicator.get('error') and indicator.values %}
+        {% if not indicator.get('error') and indicator['values'] %}
         <div class="indicator-block">
             <p class="mini-label">{{ indicator.label }}</p>
             <p class="indicator-desc">{{ indicator.description }}</p>
             <div class="indicator-values">
-                {% for entry in indicator.values[:3] %}
+                {% for entry in indicator['values'][:3] %}
                 <span class="indicator-pill">
                     <span class="pill-year">{{ entry.year }}</span>
                     <span class="pill-val">{{ entry.value }}</span>
@@ -84,6 +84,9 @@
         <p class="field-hint api-error">{{ teleport.error }}</p>
         {% else %}
         <p class="lead">City: <strong>{{ teleport.urban_area }}</strong></p>
+        {% if teleport.get('is_fallback') %}
+        <p class="field-hint api-error">{{ teleport.fallback_note }}</p>
+        {% endif %}
         <p class="teleport-total-score">
             Overall Score <span class="score-number">{{ teleport.teleport_score }}</span> / 100
         </p>
@@ -182,7 +185,7 @@
         <article class="card">
             <p class="mini-label">Teleport Urban Areas API</p>
             <p>Quality-of-life scores across 17 categories for major urban areas worldwide. Used as a talent market attractiveness and retention proxy.</p>
-            <a href="https://developers.teleport.org/api/" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Documentation</a>
+            <a href="https://open-meteo.com/en/docs" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Documentation</a>
         </article>
         <article class="card">
             <p class="mini-label">Frankfurter Exchange Rates</p>
