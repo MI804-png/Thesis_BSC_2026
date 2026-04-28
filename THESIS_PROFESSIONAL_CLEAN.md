@@ -9,7 +9,7 @@
 
 ---
 
-# Table of Content
+# Table of Contents
 
 INTRODUCTION	7
 
@@ -22,13 +22,13 @@ INTRODUCTION	7
 1.3.3.	Forming the Formulas	10
 1.3.4.	How to implement and Position the Source-code into the Thesis	10
 
-2.	FURTHER REQURIEMENTS FOR THE THESIS/DIPLOMA	11
+2.	FURTHER REQUIREMENTS FOR THE THESIS/DIPLOMA	11
 2.1.	THE STRUCTURE AND THE IDIOMS OF THE THESIS	11
 2.2.	THE FORMAL STRUCTURE OF THE THESIS	11
 2.3.	THE LENGTH OF THE THESIS	12
-2.4.	HOW TO REFER TO LITERATURE AND IDICATE REFERENCES IN THE THESIS	12
-2.5.	THE GUIDE-LINES FOR TECHNOLOGICAL DOCUMEWNTATION	13
-2.6.	SOFTVWARES	13
+2.4.	HOW TO REFER TO LITERATURE AND INDICATE REFERENCES IN THE THESIS	12
+2.5.	THE GUIDELINES FOR TECHNOLOGICAL DOCUMENTATION	13
+2.6.	SOFTWARE TOOLS	13
 2.7.	HOW TO UPLOAD THE THESIS AND THE RELATED DOCUMENTS INTO THE ELECTRONIC SYSTEM	13
 
 3.	SYSTEM DESIGN AND ARCHITECTURE OF THE REAL PROJECT	14
@@ -53,8 +53,6 @@ INTRODUCTION	7
 
 SUMMARY (CONCLUSIONS)	36
 
-SUMMARY/ZUSAMMENFASSUNG (JUST FOR THOSE WHO WRITE THE THESIS IN HUNGARIAN)	37
-
 LIST OF FIGURES	38
 
 REFERENCES	39
@@ -69,7 +67,7 @@ Modern organizations increasingly recognize the strategic value of data-driven d
 
 This fragmentation creates several operational challenges: (1) decision-makers lack a unified view of organizational health, (2) strategic interpretations often differ across departments due to inconsistent methodologies, and (3) the opacity of commercial analytics systems limits trust in algorithmic recommendations. Senior management requires analytical tools that not only aggregate data from multiple sources but also explain the underlying logic and provide transparency in how organizational indicators are computed and weighted.
 
-The aim of this thesis is to address these challenges by designing and implementing a role-based HR and management analytics system that combines transparent scoring logic with a unified data architecture. The proposed system integrates company profile information, leadership characteristics, investment background, financial performance indicators, and operational metrics into a single analytical framework. Rather than operating as a black-box predictive system, this solution prioritizes methodological traceability, providing explicit KPI formulas, role-specific dashboards, and reproducible outputs that support evidence-based managerial judgment.
+This study addresses these challenges by designing and implementing a role-based HR and management analytics system that combines transparent scoring logic with a unified data architecture. It integrates company profile information, leadership characteristics, investment background, financial performance indicators, and operational metrics into a single analytical framework. Rather than operating as a black-box predictive system, the solution prioritizes methodological traceability through explicit KPI formulas, role-specific dashboards, and reproducible outputs that support evidence-based managerial judgment.
 
 The work is both theoretically and practically motivated. From a research perspective, it demonstrates how explainable artificial intelligence and transparent rule-based modeling can be combined in an operational system. From a practical perspective, it delivers a functional software prototype that organizations can deploy to improve strategic planning, risk identification, and organizational performance evaluation.
 
@@ -87,7 +85,7 @@ A second motivation stems from the opacity of commercial business intelligence a
 
 ### 1.2 Core Problem Statement
 
-The core problem addressed by this thesis is the absence of integrated and auditable analytical frameworks that jointly evaluate multiple organizational dimensions—leadership readiness, scaling risk, financial health, and operational resilience—within a single transparent model. Existing solutions exhibit three critical weaknesses:
+At the center of the problem is the absence of integrated and auditable analytical frameworks that jointly evaluate multiple organizational dimensions—leadership readiness, scaling risk, financial health, and operational resilience—within a single transparent model. Existing solutions exhibit three critical weaknesses:
 
 1. **Functional Silos:** HR, finance, and operations analytics operate independently. KPIs computed in one domain are not systematically integrated with indicators from other domains, limiting cross-functional insights.
 
@@ -97,7 +95,7 @@ The core problem addressed by this thesis is the absence of integrated and audit
 
 ### 1.3 Thesis Objectives
 
-This thesis aims to achieve the following objectives:
+The project pursues the following objectives:
 
 1. **Design a transparent, auditable KPI model** with explicit normalization rules and weighted aggregation formulas that can be reviewed, validated, and modified by subject-matter experts.
 
@@ -131,7 +129,7 @@ This thesis aims to achieve the following objectives:
 - Multi-currency or multi-language support
 - Production-grade enterprise security hardening
 
-This scope is appropriate for thesis research, enabling thorough validation of the analytical model and system architecture while remaining implementable within thesis time and resource constraints.
+The selected scope is appropriate for thesis research, enabling thorough validation of the analytical model and system architecture while remaining implementable within thesis time and resource constraints.
 
 ---
 
@@ -171,7 +169,7 @@ The research literature reveals three significant gaps:
 
 3. **Accessibility Gap:** Enterprise analytics platforms are expensive and complex, limiting their availability to smaller organizations and custom implementation contexts.
 
-This thesis addresses these gaps through a transparent, integrated analytical framework combining rule-based KPI computation with local machine learning support. By prioritizing methodological traceability and role-specific visualization, the work demonstrates that professional, auditable decision support can be implemented within academic and organizational resource constraints. [5][10][17]
+To close these gaps, the thesis introduces a transparent and integrated analytical framework that combines rule-based KPI computation with local machine learning support. By prioritizing methodological traceability and role-specific visualization, the work demonstrates that professional, auditable decision support can be implemented within academic and organizational resource constraints. [5][10][17]
 
 ---
 
@@ -179,21 +177,21 @@ This thesis addresses these gaps through a transparent, integrated analytical fr
 
 ### 3.1 Architectural Overview and Layered Design
 
-The system employs a four-layer architecture emphasizing separation of concerns and modularity:
+A four-layer architecture is adopted to enforce separation of concerns and modularity:
 
-**Layer 1 – Presentation Layer:** User interfaces provided through HTML templates rendered by Flask, CSS styling for responsive design, and vanilla JavaScript for client-side interactivity. This layer handles user authentication, form input collection, dashboard rendering, and PDF export initiation.
+**Layer 1 – Presentation Layer:** User interfaces provided through HTML templates rendered by Flask, CSS styling for responsive design, and vanilla JavaScript for client-side interactivity. It handles user authentication, form input collection, dashboard rendering, and PDF export initiation.
 
-**Layer 2 – Application Layer:** Flask-based web routing, session management, request validation, and orchestration of analytical workflows. This layer enforces authentication and authorization, routes requests to appropriate business logic, and constructs response context for template rendering.
+**Layer 2 – Application Layer:** Flask-based web routing, session management, request validation, and orchestration of analytical workflows. It enforces authentication and authorization, routes requests to appropriate business logic, and constructs response context for template rendering.
 
-**Layer 3 – Analytics Layer:** Core computational engine implementing KPI normalization, rule-based scoring, weighted aggregation, and prediction interpretation. This layer contains deterministic algorithms and is decoupled from web concerns, enabling independent testing and validation.
+**Layer 3 – Analytics Layer:** Core computational engine implementing KPI normalization, rule-based scoring, weighted aggregation, and prediction interpretation. The layer contains deterministic algorithms and is decoupled from web concerns, enabling independent testing and validation.
 
-**Layer 4 – Persistence Layer:** SQLite database management including user account storage, analysis history archiving, and metadata curation. This layer ensures data consistency and enables longitudinal trend analysis.
+**Layer 4 – Persistence Layer:** SQLite database management including user account storage, analysis history archiving, and metadata curation. It ensures data consistency and enables longitudinal trend analysis.
 
-This layering improves maintainability, testability, and extensibility. The analytics layer can be validated independently of web routing; the persistence layer can evolve toward stronger databases (PostgreSQL) without affecting analytical logic.
+Overall, the layered design improves maintainability, testability, and extensibility. The analytics layer can be validated independently of web routing; the persistence layer can evolve toward stronger databases (PostgreSQL) without affecting analytical logic.
 
 ### 3.2 Data Model and Input Dimensions
 
-The system organizes inputs into three thematic domains:
+For analytical clarity, inputs are organized into three thematic domains:
 
 **Domain 1 – Leadership and People:**
 - Leadership Years: accumulated tenure in leadership roles
@@ -217,7 +215,7 @@ All inputs are normalized to comparable 0-100 scales to enable weighted aggregat
 
 ### 3.3 KPI Design and Normalization Strategy
 
-The system computes four principal indicators:
+From these inputs, the analytical engine computes four principal indicators:
 
 **Leadership Readiness Score (LRS)** [Formula 1]
 
@@ -247,7 +245,7 @@ All formulas employ equal-weight assumptions where domain expertise is absent, w
 
 ### 3.4 Role-Based Dashboard Architecture
 
-The system generates role-specific analytical views aligned with decision-making authority and information needs:
+Role-specific analytical views are generated to align with decision-making authority and information needs:
 
 **CEO Dashboard:** Emphasizes strategic health indicators, growth capacity, and overall risk posture. Prioritizes OHI, LRS, and SRS trends over detailed operational metrics.
 
@@ -310,7 +308,7 @@ Importantly, the ML layer does not replace deterministic KPI logic. It remains a
 - .gitignore for version control hygiene
 - README.md for operational documentation
 
-The technology stack emphasizes accessibility, reproducibility, and minimal operational complexity. No external cloud services, proprietary software, or advanced frameworks are required.
+From an implementation perspective, the technology stack emphasizes accessibility, reproducibility, and minimal operational complexity. No external cloud services, proprietary software, or advanced frameworks are required.
 
 ### 4.2 Core Modules and Responsibilities
 
@@ -443,7 +441,7 @@ The reporting pipeline generates portable PDF documents capturing analysis resul
 
 **Deterministic Output:** Identical inputs produce byte-identical PDFs across reruns, enabling regression testing and reproducibility verification.
 
-This approach supports governance and audit requirements while maintaining practical usability for reporting and documentation.
+Collectively, these design decisions support governance and audit requirements while maintaining practical usability for reporting and documentation.
 
 ### 4.6 System Interface Screenshots
 
@@ -507,11 +505,11 @@ Finance leadership reviews quarterly dashboard updates. Debt-to-equity ratio inc
 **Use Case 4 – Operations Risk Assessment:**
 Operations leadership identifies key-person dependency scores of 85 (high concentration on two process leads). System recommends process documentation improvements and cross-training initiatives. After documentation and training, dependency score decreases to 62; SRS improves from 55 to 48, and OHI increases from 58 to 66.
 
-These use cases demonstrate that the system effectively surfaces organizational risks and supports role-specific decision-making without requiring advanced analytics expertise.
+Taken together, these use cases indicate that the platform effectively surfaces organizational risks and supports role-specific decision-making without requiring advanced analytics expertise.
 
 ### 6.1 Key Findings and Contributions
 
-This thesis successfully demonstrated that transparent, auditable, and integrated decision-support systems can be implemented for organizational HR and management analytics without relying on proprietary black-box commercial platforms. The work makes contributions at three levels: methodological, architectural, and practical.
+The results show that transparent, auditable, and integrated decision-support systems can be implemented for organizational HR and management analytics without relying on proprietary black-box commercial platforms. The work makes contributions at three levels: methodological, architectural, and practical.
 
 **Methodological Contribution:** The thesis establishes explicit, traceable KPI formulas combining HR, operations, and financial dimensions into a unified organizational health assessment framework. By prioritizing transparency over model complexity, the work demonstrates that professional-grade analytics can maintain both interpretability and organizational relevance.
 
@@ -575,24 +573,24 @@ This thesis successfully demonstrated that transparent, auditable, and integrate
 
 4. **Enterprise Deployment:** Migrate to cloud-scale architecture supporting 100+ organizations, role-based SaaS deployment, and regulatory compliance (SOC 2, HIPAA, GDPR).
 
-In summary, the thesis objective is achieved: the work demonstrates that an explainable, auditable, and extensible decision-support platform can be developed to improve organizational analysis and strategic planning while remaining implementable within academic and organizational resource constraints.
+In summary, the thesis objective is achieved: the results show that an explainable, auditable, and extensible decision-support platform can improve organizational analysis and strategic planning while remaining implementable within academic and organizational resource constraints.
 
 
 ---
 
 # SUMMARY
 
-This thesis examined the problem of fragmented, opaque organizational decision-making and proposed a solution through a role-based HR and management analytics system that combines multiple organizational dimensions into a unified, transparent analytical framework.
+The thesis examined the problem of fragmented, opaque organizational decision-making and proposed a solution through a role-based HR and management analytics system that combines multiple organizational dimensions into a unified, transparent analytical framework.
 
 **Problem and Motivation:** Modern organizations collect substantial data across HR, finance, and operations but lack integrated analytical frameworks for holistic organizational assessment. Commercial analytics platforms often prioritize predictive accuracy over explainability, creating governance challenges and limiting organizational trust. Smaller organizations face cost barriers and accessibility limitations.
 
 **Proposed Solution:** A four-layer system architecture integrates company profile information, leadership indicators, financial metrics, and operational measures into a deterministic KPI engine producing Leadership Readiness Score, Scaling Risk Score, Financial Stability Composite, and Organizational Health Index. Transparent, traceable formulas enable organizational governance over analytical logic. Role-specific dashboards present results aligned with CEO, HR, Finance, and Operations decision needs. A local machine learning model provides comparative probability estimation without replacing accountable rule-based analysis.
 
-**Technical Implementation:** The system employs Python, Flask, SQLite, and standard libraries without proprietary dependencies. Modular architecture enables independent analytics testing and evolution toward stronger persistence infrastructure. CSV batch ingestion supports bulk analysis. Snapshot-based PDF reporting ensures reproducibility and auditability.
+**Technical Implementation:** The implementation uses Python, Flask, SQLite, and standard libraries without proprietary dependencies. The modular architecture enables independent analytics testing and supports evolution toward stronger persistence infrastructure. CSV batch ingestion supports bulk analysis, while snapshot-based PDF reporting ensures reproducibility and auditability.
 
 **Validation Results:** Functional testing confirmed authentication, input validation, deterministic KPI computation, batch robustness, persistence consistency, and export reproducibility. Scenario testing demonstrated appropriate risk differentiation across organizational profiles. Performance metrics indicate sub-second analysis computation and rapid batch processing.
 
-**Practical Impact:** The system enables early risk identification through transparent metrics, supports evidence-based strategic planning through role-specific dashboards, maintains analytical governance through explicit formula traceability, and establishes a foundation for progressive enhancement without architectural redesign.
+**Practical Impact:** In practice, the system enables early risk identification through transparent metrics, supports evidence-based strategic planning through role-specific dashboards, maintains analytical governance through explicit formula traceability, and establishes a foundation for progressive enhancement without architectural redesign.
 
 **Key Findings:** (1) Transparent rule-based analytics can meet organizational standards without sacrificing operational usability or decision relevance; (2) Multi-domain organizational assessment is achievable through explicit normalization and weighted integration; (3) Modular system architecture supports evolution from academic prototype to production deployment.
 

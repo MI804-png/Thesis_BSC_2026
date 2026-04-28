@@ -416,7 +416,7 @@ Computed KPIs along with forecasts appear here as result_json in TEXT format
 
 One step at a time, it handles multiple users by keeping data separate per person. Queries know who's asking because roles shape what shows up. When results need saving, snapshots lock them in place. Instead of rigid fields, JSON holds changing model details without breaking stride.
 
-4.5 Pdf reporting and export functionality
+### 4.5 PDF Reporting and Export Functionality
 
 Right away, the system puts together PDF files that hold findings exactly as they appear when saved. These reports travel well, staying clear no matter where they go
 
@@ -433,6 +433,10 @@ Maybe include a machine learning score part showing how likely things are plus w
 Every time you feed it the same input, out comes a PDF that matches down to each byte - repeatable results sit there waiting every single run. Matching bytes mean checks for changes work without guesswork, proof of consistency built right in.
 
 Still, it handles oversight needs without losing touch with everyday report work. How? By keeping rules clear but not heavy handed when tracking or recording tasks.
+
+### 4.6 System Interface Screenshots
+
+This section presents selected user interface captures from the implemented prototype. The figures document the primary workflow screens used during analysis and reporting.
 
 ---
 
@@ -665,22 +669,22 @@ ATTACHMENTS
 Appendix A Input Data Structure and Checking Rules
 
 Required Fields 14 inputs
-Field Type Minimum Maximum Default Unit
+| Field | Type | Min | Max | Default | Unit |
 |-------|------|-----|-----|---------|------|
-One sunny morning, birds chirping nearby, workers arrived at the building early. A quiet hum filled the lobby as screens lit up slowly. People moved through hallways carrying mugs and notebooks. The name on the wall stayed unchanged, just letters in clean font. Outside, traffic rolled past without stopping. Inside, routines unfolded like clockwork every day
-On one hand, technology shows up under category. Dropdown appears next, tied to a specific field. Industry links here through selection. The word Technology fits inside quotes. A dash separates each part. Another dash follows after. Structure stays clear without extra details
-Growth shows up under category when you pick it from the list. One option among others, found by moving through selections. Not first, not last, just there. Appears after a tap, sits in place until changed. Part of the setup, but not required. Shows meaning only when chosen. Stays quiet if ignored
-Number of staff sits between one and ten thousand. A hundred workers marks the midpoint here. From solo roles up to large teams, coverage is complete. The scale stretches from tiny groups to big workforces. One person might start it all, while others grow much larger. Ten thousand represents the upper edge reached. Staff size ranges across a wide span by design.
-Leadership spans range from zero up to fifty years. Five-year intervals mark each step along the way. Time moves forward in chunks that size. No leader falls outside this timeline. Every value fits within those boundaries.
-Score shown as a number. Ranges from one to ten. Typically sits around five. Measured on a scale where one is lowest, ten highest. Value reflects digital performance plainly. Uses whole numbers only. Easy to compare across cases
-Eighty five percent sticks around. That number shows what portion stays after everything else falls away. From zero to a full hundred, this one lands near the top. Numbers like these measure how much remains when time passes. The scale runs bottom to peak, marking levels along the way. A value sits boxed within that range. Percentage terms tell the story clearly
-Fifteen percent shows up here as a number between zero and one hundred. This value tracks how much slips away, measured in full percentages. Range stays fixed from bottom at zero to top near one hundred. A figure like this often reflects loss over time, clear in scale. Measured cleanly in whole percents, nothing fractional appears.
-Half of one thing compared to another shows up here. Five is the top number allowed in this spot. Zero marks the bottom edge, nothing less accepted. Numbers live between these walls, never outside. This slot holds figures, always digits only. Debt against equity fits inside this label. One part connects to company borrowing habits.
-Score shown as a number. Ranges from zero to one hundred. Sixty means sixty percent documented. Value reflects completeness of paperwork. Higher numbers suggest more pages filled. Measured in whole digits only. Full marks need every section done. Not about quality, just amount. Zero implies nothing recorded at all. Each point stands for one percent covered.
-Score shows how much depends on one area. Ranges from zero to a hundred. Forty means nearly half relies there. Measured in percentage terms. Higher numbers suggest more focus in single spots.
-Fifteen percent shows the typical target. Negative fifty means a big loss on each sale. A full one hundred gives double revenue as profit. This number stays between those two edges. Profit percentage fits here, clearly defined by these values.
-Twenty percent yearly change. Ranges from minus fifty up to one hundred. Expressed as a percentage. Type is numeric. Measures growth over time
-Twelve counts how long until funds run out. Zero means no buffer at start. Sixty sets the outer edge of time possible. Numbers here show survival span ahead. Each step marks a month with money left. Time stretches from now into future months. Count steps forward while cash holds up
+| company_name | Text | - | 100 chars | "Company" | - |
+| industry | Category | - | dropdown | "Technology" | - |
+| stage | Category | - | dropdown | "Growth" | - |
+| employee_count | Numeric | 1 | 10000 | 100 | employees |
+| leadership_years | Numeric | 0 | 50 | 5 | years |
+| digital_score | Numeric | 1 | 10 | 5 | 1-10 scale |
+| retention_pct | Numeric | 0 | 100 | 85 | % |
+| churn_pct | Numeric | 0 | 100 | 15 | % |
+| dte_ratio | Numeric | 0 | 5 | 0.5 | debt/equity |
+| doc_score | Numeric | 0 | 100 | 60 | % documentation |
+| dep_score | Numeric | 0 | 100 | 40 | % dependency concentration |
+| margin_pct | Numeric | -50 | 100 | 15 | % profit margin |
+| growth_pct | Numeric | -50 | 100 | 20 | % YoY growth |
+| cash_months | Numeric | 0 | 60 | 12 | months of runway |
 
 CSV Upload Schema Exact Column Order Required
 
@@ -708,12 +712,12 @@ Most of the weight sits on one thing. That thing is x. The function just returns
 
 Risk Band Thresholds:
 
-Low Risk Moderate Risk High Risk
+| Metric | Low Risk | Moderate Risk | High Risk |
 |--------|----------|---------------|-----------|
-Healthy levels sit between seventy and one hundred. From fifty to sixty-nine shows room for improvement. Zero up to forty-nine means concern is high.
-Lowest range sits between sixty five and one hundred. Forty five up to sixty four follows next in line. Zero through forty four brings up the rear.
-Low score stands at zero up to thirty nine. Forty brings us into moderate range, lasting till fifty nine. High impact hits once we reach sixty and continues through a full hundred.
-Wood from managed forests sits between sixty five and one hundred. Forty five to sixty four appears next, steady but quiet. Zero up to forty four closes the row, low yet clear.
+| OHI | 70-100 | 50-69 | 0-49 |
+| LRS | 65-100 | 45-64 | 0-44 |
+| SRS | 0-39 | 40-59 | 60-100 |
+| FSC | 65-100 | 45-64 | 0-44 |
 
 Appendix C API Routes and Responses
 
@@ -779,12 +783,13 @@ Access at http://127.0.0.1:5000
 Demo Credentials:
 
 User Credentials Table
+| Username | Password | Role | Purpose |
 |----------|----------|------|---------|
-admin user credentials system access
-Ceo Dashboard Access For Ceo Demo User
-Someone logs in with a code called demo123. Access goes to a section named hr_demo. The area is meant for people working in hr. Dashboard shows up after entry works correctly. Permissions are limited to specific functions only
-Finance Dashboard Access For Demo User
-Operations Dashboard Access For Demo User
+| admin | admin123 | admin | System administration |
+| ceo_demo | demo123 | ceo | CEO dashboard access |
+| hr_demo | demo123 | hr | HR dashboard access |
+| finance_demo | demo123 | finance | Finance dashboard access |
+| ops_demo | demo123 | operations | Operations dashboard access |
 
 Production Considerations:
 
